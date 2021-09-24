@@ -6,8 +6,8 @@ This will be a wishlist website that uses SpringBoot for backend, and React for 
 Users will be able to add items to a personal wislist with names, descriptions, and links to the items themselves.
 
 ##Sitemap:
-![sitemap] (sitemap.png)
+![sitemap](sitemap.png)
 
 ##ERD:
 
-![ERD] (ERD.png)
+![ERD](ERD.png)
