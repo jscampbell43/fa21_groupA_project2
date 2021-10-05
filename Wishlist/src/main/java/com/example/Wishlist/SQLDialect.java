@@ -1,7 +1,5 @@
 package com.example.Wishlist;
 
-import org.hibernate.dialect.Dialect;
-
 import java.sql.Types;
 
 import org.hibernate.dialect.Dialect;
@@ -137,4 +135,6 @@ public class SQLDialect extends Dialect {
     public boolean supportsCascadeDelete() {
         return false;
     }
+
 }
+
