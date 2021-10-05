@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS USERS (
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ITEMS (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    item_link TEXT,
+    img_url TEXT,
+    list_name TEXT NOT NULL
+);

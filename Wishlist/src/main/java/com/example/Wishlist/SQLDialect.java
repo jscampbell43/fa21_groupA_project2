@@ -135,4 +135,6 @@ public class SQLDialect extends Dialect {
     public boolean supportsCascadeDelete() {
         return false;
     }
+
 }
+
