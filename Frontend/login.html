@@ -1,16 +1,33 @@
 <!DOCTYPE html>
 <html>
-<body>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Sign Up Page</title>
+        <link href="styles.css" rel="stylesheet" type="text/css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    </head>
+    <body>
 
-    <h1>Login</h1>
-    
-    <p>Please enter your username and password</p>
+        <h1>Login</h1>
+        <br>
+        <form method = "POST" id = "loginForm" action = "homeUser.html">
+            <p>Please enter your username and password</p>
+            <br>
+            
+            Username: <input type = "text" id = "loginUserName">
+            <br>
+            <span id="usernameError"></span><br>
 
-    <input type = "text" id = "userName">
-    <br>
-    <input type = "text" id = "password">
-    <br>
-    <button id = "loginBtn">Login</button>
+            Password: <input type = "text" id = "loginPassword">
+            <br>
+            <span id="passwordError"></span><br>
 
-</body>
+            <input type = "submit" value = "Login">
+            <br>
+        </form>
+        <br>
+
+        <script src="script.js"></script>
+    </body>
 </html>
