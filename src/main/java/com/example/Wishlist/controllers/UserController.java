@@ -11,8 +11,10 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/users")
 public class UserController {
+    private List<UserDB> user;
     private UserDAO userDAO;
-    public UserController(UserDAO userDAO){this.userDAO=userDAO;}
+    public UserController(UserDAO userDAO) { this.userDAO = userDAO; }
+
     @GetMapping(value = "/allUsers")
     public List<UserDB> getAllUsers(){return userDAO.findAll();}
 }
