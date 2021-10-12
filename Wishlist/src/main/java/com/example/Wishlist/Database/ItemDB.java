@@ -2,6 +2,7 @@ package com.example.Wishlist.Database;
 
 
 import javax.persistence.*;
+import java.util.List;
 
 @Table(name="ITEMS")
 @Entity
@@ -22,6 +23,16 @@ public class ItemDB {
     private String item_url;
 
     private String list_name;
+
+    public List<ItemDB> getItems() {
+        return items;
+    }
+
+    public void setItems(List<ItemDB> items) {
+        this.items = items;
+    }
+
+    private List<ItemDB> items;
 
 
     public ItemDB(int user_id, String name, String description, String item_link, String item_url, String list_name) {
@@ -88,4 +99,6 @@ public class ItemDB {
     public void setList_name(String list_name) {
         this.list_name = list_name;
     }
+
 }
+
