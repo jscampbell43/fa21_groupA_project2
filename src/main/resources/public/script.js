@@ -1,5 +1,5 @@
 $(document).ready(function(){
-  
+
     var usernameAvailable = false;
 
     $("#userName").on("change", async function(){
@@ -7,7 +7,7 @@ $(document).ready(function(){
         // Use database to determine if username is available
         let desiredUsername = $("#username").val();
         //if (desiredUsername.equals("user")){
-            usernameAvailable = true;
+        usernameAvailable = true;
         //}
     });
 
@@ -15,7 +15,7 @@ $(document).ready(function(){
         //alert("Submitting form...");
         if(!isFormValid()){
             event.preventDefault();
-        }  
+        }
     });
 
     function isFormValid(){
