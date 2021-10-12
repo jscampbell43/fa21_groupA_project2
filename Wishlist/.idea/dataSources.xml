@@ -27,5 +27,12 @@
         </library>
       </libraries>
     </data-source>
+    <data-source source="LOCAL" name="WishlistData.db" uuid="1f979a24-b339-459a-9c4c-19a8f2599d60">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/WishlistData.db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
