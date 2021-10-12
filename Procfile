@@ -1,1 +1,1 @@
-web: java -jar build/Wishlist/src
+web: mvn spring-boot:run
