@@ -6,9 +6,9 @@ $(document).ready(function(){
         alert($("#username").val());
         // Use database to determine if username is available
         let desiredUsername = $("#username").val();
-        //if (desiredUsername.equals("user")){
-        usernameAvailable = true;
-        //}
+        if (desiredUsername.equals("user")){
+            usernameAvailable = true;
+        }
     });
 
     $("#loginForm").on("submit", function(event){
@@ -23,6 +23,8 @@ $(document).ready(function(){
         // Check if Username is available
         if(!usernameAvailable){
             isValid = false;
+            $("#usernameError").html("Username is Not Available");
+            $("#usernameError").css("color", "red");
         }
         // Check if Username field is blank
         if($("#loginUserName").val().length == 0){
