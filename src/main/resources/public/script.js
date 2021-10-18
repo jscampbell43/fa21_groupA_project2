@@ -6,6 +6,8 @@ $(document).ready(function(){
         alert($("#username").val());
         // Use database to determine if username is available
         let desiredUsername = $("#username").val();
+        $("#usernameError").html("Username:" + desiredUsername);
+        $("#usernameError").css("color", "green");
         if (desiredUsername.equals("user")){
             usernameAvailable = true;
         }
