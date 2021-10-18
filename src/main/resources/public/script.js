@@ -15,9 +15,9 @@ $(document).ready(function(){
 
     $("#loginForm").on("submit", function(event){
         //alert("Submitting form...");
-        if(!isFormValid()){
-            event.preventDefault();
-        }
+        // if(!isFormValid()){
+        //     event.preventDefault();
+        // }
     });
 
     function isFormValid(){
