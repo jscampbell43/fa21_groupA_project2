@@ -19,6 +19,6 @@ public class UserController {
     public List<UserDB> getAllUsers(){return userDAO.findAll();}
 
     @GetMapping(value = "/signup")
-    public void insertNewUser(){userDAO.insertUser(req.body.username, req.body.password);}
+    public void insertNewUser(){userDAO.insertUser();}
     
 }
