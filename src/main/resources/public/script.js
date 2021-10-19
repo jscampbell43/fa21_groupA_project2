@@ -67,13 +67,13 @@ $(document).ready(function(){
             $("#usernameError").css("color", "red");
         }
         // Check if Username field is blank
-        if($("#loginUserName").val().length == 0){
+        if($("#username").val().length == 0){
             isValid = false;
             $("#usernameError").html("Username is required");
             $("#usernameError").css("color", "red");
         }
         // Check password field is not blank
-        if($("#loginPassword").val().length ==0){
+        if($("#password").val().length ==0){
             $("#passwordError").html("Password is required");
             $("#passwordError").css("color", "red");
             isValid = false;
