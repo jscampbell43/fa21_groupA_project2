@@ -43,4 +43,8 @@ $(document).ready(function(){
         return isValid;
     }
 
+    $('#signUpBtn').click(function(){
+        window.location.href='signUp.html';
+     })
+
 });
