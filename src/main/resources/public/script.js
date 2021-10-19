@@ -1,21 +1,40 @@
 $(document).ready(function(){
 
-    var usernameAvailable = false;
+    var usernameAvailable = true;
 
-    $("#userName").on("change", async function(){
-        alert($("#username").val());
+   // $("#loginUserName").on("change", async function(){
+       // alert($("#loginUserName").val());
         // Use database to determine if username is available
-        let desiredUsername = $("#username").val();
+        //let desiredUsername = $("#loginUserName").val();
         //if (desiredUsername.equals("user")){
-        usernameAvailable = true;
+        //usernameAvailable = true;
         //}
-    });
+  //  });
 
-    $("#loginForm").on("submit", function(event){
-        //alert("Submitting form...");
+    $("#loginForm").on("submit", function(action){
         if(!isFormValid()){
-            event.preventDefault();
+            action.preventDefault();
+            return;
         }
+        let username = $("#loginUserName").val();
+        let password = $("#loginPassword").val();
+        $.ajax({
+            url: "http://localhost:8080/users/" + username,
+            type: "GET",
+            async: false,
+            success:function(data) {
+                let dbUser = data.username;
+                let dbPass = data.password;
+                if (username==dbUser && password==dbPass) {
+                    alert("login Success");
+                    sessionStorage.setItem("user", data.user_id);
+                    //alert(sessionStorage.getItem("user"));
+                } else {
+                    action.preventDefault();
+                    alert("login failed");
+                }
+            }
+        });
     });
 
     function isFormValid(){
@@ -24,6 +43,7 @@ $(document).ready(function(){
         if(!usernameAvailable){
             isValid = false;
         }
+
         // Check if Username field is blank
         if($("#loginUserName").val().length == 0){
             isValid = false;
