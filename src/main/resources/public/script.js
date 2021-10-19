@@ -49,7 +49,7 @@ $(document).ready(function(){
     });
 
     function isSignUpFormValid(){
-        isValid = true;
+        isValid = false;
         // Check if Username is available
         $.ajax({
             url: "https://cst438-project2-groupa-front.herokuapp.com/users/allUsers",
