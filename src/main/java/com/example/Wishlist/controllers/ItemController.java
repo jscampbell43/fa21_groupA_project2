@@ -27,15 +27,15 @@ public class ItemController {
         return itemDAO.findAll();
     }
 
+    @GetMapping(value = "/itemSearch")
+    public List<ItemDB> searchItem(@PathVariable String item_name){
+        return itemDAO.findItemBySearch(item_name);
+
     @RequestMapping(value = "/user/{user_id}")
     public List<ItemDB> getitemByUser(@PathVariable int user_id) {return itemDAO.findItemByUser(user_id); }
 
     @RequestMapping(value = "/list/{list_name}/user/{user_id}")
     public List<ItemDB> getItemsByList(@PathVariable String list_name, @PathVariable int user_id) {return  itemDAO.findItemByList(list_name, user_id);}
-
-    @GetMapping(value = "/itemSearch/{searchvar}" )
-    public List<ItemDB> getItemById(@PathVariable String searchvar){
-        return itemDAO.findItemBySearch(searchvar);
     }
 //    @Query("FROM ItemDB WHERE user_id = ?1")
 //    List<ItemDB> findItemByUser(int user_id);
