@@ -1,5 +1,4 @@
-const express = require('express');
-const app = express();
+
 
 $(document).ready(function(){
 
@@ -52,13 +51,6 @@ $(document).ready(function(){
         //isSignUpFormValid();
     });
 
-    app.post('/signup', async function(req, res){
-        let username = req.body.username;
-        let password = req.body.password;
-        console.log("username: " + username);
-        console.log("password: " + password);
-    })
-
     async function isSignUpFormValid(){
         isValid = true;
         // Check if Username is available
@@ -81,6 +73,7 @@ $(document).ready(function(){
         //     $("#usernameError").html("Username is Not Available");
         //     $("#usernameError").css("color", "red");
         // }
+
         // Check if Username field is blank
         if($("#username").val().length == 0){
             isValid = false;
@@ -93,6 +86,8 @@ $(document).ready(function(){
             $("#passwordError").css("color", "red");
             isValid = false;
         }
+
+
         // Create account
 
 
