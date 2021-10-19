@@ -42,13 +42,13 @@ $(document).ready(function(){
     })
 
     $("#signupForm").on("submit", function(event){
-        //alert("Submitting form...");
-        // if(!isFormValid()){
-        //     event.preventDefault();
-        // }
+        alert("Submitting Signup form...");
+        if(!isSignUpFormValid()){
+            event.preventDefault();
+        }
     });
 
-    function isLoginFormValid(){
+    function isSignUpFormValid(){
         isValid = true;
         // Check if Username is available
         $.ajax({
