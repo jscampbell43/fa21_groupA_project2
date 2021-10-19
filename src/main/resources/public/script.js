@@ -14,20 +14,14 @@ $(document).ready(function(){
     });
 
     $("#loginForm").on("submit", function(event){
-        //alert("Submitting form...");
-        // if(!isFormValid()){
-        //     event.preventDefault();
-        // }
+        alert("Submitting form...");
+        if(!isLoginFormValid()){
+            event.preventDefault();
+        }
     });
 
-    function isFormValid(){
+    function isLoginFormValid(){
         isValid = true;
-        // Check if Username is available
-        if(!usernameAvailable){
-            isValid = false;
-            $("#usernameError").html("Username is Not Available");
-            $("#usernameError").css("color", "red");
-        }
         // Check if Username field is blank
         if($("#loginUserName").val().length == 0){
             isValid = false;
@@ -45,6 +39,45 @@ $(document).ready(function(){
 
     $('#signUpBtn').click(function(){
         window.location.href='signUp.html';
-     })
+    })
+
+    $("#signupForm").on("submit", function(event){
+        //alert("Submitting form...");
+        // if(!isFormValid()){
+        //     event.preventDefault();
+        // }
+    });
+
+    function isLoginFormValid(){
+        isValid = true;
+        // Check if Username is available
+        $.ajax({
+            url: "https://cst438-project2-groupa-front.herokuapp.com/users/allUsers",
+            success: function(result) {
+                $("#SignUpSuccess").html('<span id ="SignUpSuccess">' + result + '</span> <br><br>');
+            }
+        });
+
+        if(!usernameAvailable){
+            isValid = false;
+            $("#usernameError").html("Username is Not Available");
+            $("#usernameError").css("color", "red");
+        }
+        // Check if Username field is blank
+        if($("#loginUserName").val().length == 0){
+            isValid = false;
+            $("#usernameError").html("Username is required");
+            $("#usernameError").css("color", "red");
+        }
+        // Check password field is not blank
+        if($("#loginPassword").val().length ==0){
+            $("#passwordError").html("Password is required");
+            $("#passwordError").css("color", "red");
+            isValid = false;
+        }
+        // Create account
+
+        return isValid;
+    }
 
 });
