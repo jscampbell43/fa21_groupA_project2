@@ -55,8 +55,8 @@ $(document).ready(function(){
     app.post('/signup', async function(req, res){
         let username = req.body.username;
         let password = req.body.password;
-        //console.log("username: " + username);
-        //console.log("password: " + password);
+        console.log("username: " + username);
+        console.log("password: " + password);
     })
 
     async function isSignUpFormValid(){
