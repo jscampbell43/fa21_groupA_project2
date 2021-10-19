@@ -2,28 +2,39 @@
 
 $(document).ready(function(){
 
-    //var usernameAvailable = false;
-
-    $("#userName").on("change", async function(){
-        alert($("#username").val());
-        // Use database to determine if username is available
-        let desiredUsername = $("#username").val();
-        $("#usernameError").html("Username:" + desiredUsername);
-        $("#usernameError").css("color", "green");
-        if (desiredUsername === "user"){
-            usernameAvailable = true;
+    $("#loginForm").on("submit", function(action){
+        if(!isFormValid()){
+            action.preventDefault();
+            return;
         }
-    });
-
-    $("#loginForm").on("submit", function(event){
-        alert("Submitting Login form...");
-        if(!isLoginFormValid()){
-            event.preventDefault();
-        }
+        let username = $("#loginUserName").val();
+        let password = $("#loginPassword").val();
+        $.ajax({
+            url: "http://localhost:8080/users/" + username,
+            type: "GET",
+            async: false,
+            success:function(data) {
+                let dbUser = data.username;
+                let dbPass = data.password;
+                if (username==dbUser && password==dbPass) {
+                    alert("login Success");
+                    sessionStorage.setItem("user", data.user_id);
+                    //alert(sessionStorage.getItem("user"));
+                } else {
+                    action.preventDefault();
+                    alert("login failed");
+                }
+            }
+        });
     });
 
     function isLoginFormValid(){
         isValid = true;
+        // Check if Username is available
+        if(!usernameAvailable){
+            isValid = false;
+        }
+
         // Check if Username field is blank
         if($("#loginUserName").val().length == 0){
             isValid = false;
@@ -68,13 +79,6 @@ $(document).ready(function(){
             }
         });
 
-        // if(!usernameAvailable){
-        //     isValid = false;
-        //     $("#usernameError").html("Username is Not Available");
-        //     $("#usernameError").css("color", "red");
-        // }
-
-        // Check if Username field is blank
         if($("#username").val().length == 0){
             isValid = false;
             $("#usernameError").html("Username is required");
@@ -86,11 +90,6 @@ $(document).ready(function(){
             $("#passwordError").css("color", "red");
             isValid = false;
         }
-
-
-        // Create account
-
-
         return isValid;
     }
 

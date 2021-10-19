@@ -19,7 +19,7 @@ public class ItemDB {
 
     private String item_link;
 
-    private String item_url;
+    private String img_url;
 
     private String list_name;
 
@@ -29,7 +29,7 @@ public class ItemDB {
         this.name = name;
         this.description = description;
         this.item_link = item_link;
-        this.item_url = item_url;
+        this.img_url = item_url;
         this.list_name = list_name;
     }
 
@@ -73,12 +73,12 @@ public class ItemDB {
         this.item_link = item_link;
     }
 
-    public String getItem_url() {
-        return item_url;
+    public String getImg_url() {
+        return img_url;
     }
 
-    public void setItem_url(String item_url) {
-        this.item_url = item_url;
+    public void setImg_url(String img_url) {
+        this.img_url = img_url;
     }
 
     public String getList_name() {
