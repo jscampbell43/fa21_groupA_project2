@@ -19,8 +19,15 @@ public class UserController {
     @GetMapping(value = "/allUsers")
     public List<UserDB> getAllUsers(){return userDAO.findAll();}
 
+
     @GetMapping(value = "/{username}")
     public UserDB findUserByName(@PathVariable String username){
         return userDAO.findUserByname(username);
     }
+
+    // @PostMapping(value = "/signup")
+    // @ResponseBody
+    // public void insertNewUser(@RequestParam String username, @RequestParam String password){userDAO.insertUser(username, password);}
+    
+
 }
