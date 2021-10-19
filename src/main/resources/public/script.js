@@ -43,9 +43,10 @@ $(document).ready(function(){
 
     $("#signupForm").on("submit", function(event){
         alert("Submitting Signup form...");
-        if(!isSignUpFormValid()){
-            event.preventDefault();
-        }
+        // if(!isSignUpFormValid()){
+        event.preventDefault();
+        // }
+        isSignUpFormValid();
     });
 
     async function isSignUpFormValid(){
