@@ -18,7 +18,7 @@ public class UserController {
     @GetMapping(value = "/allUsers")
     public List<UserDB> getAllUsers(){return userDAO.findAll();}
 
-    // @GetMapping(value = "/signup")
-    // public void insertNewUser(){userDAO.insertUser();}
+    @GetMapping(value = "/signup")
+    public void insertNewUser(){userDAO.insertUser();}
     
 }
