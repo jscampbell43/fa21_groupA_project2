@@ -8,7 +8,7 @@ $(document).ready(function(){
         let desiredUsername = $("#username").val();
         $("#usernameError").html("Username:" + desiredUsername);
         $("#usernameError").css("color", "green");
-        if (desiredUsername.equals("user")){
+        if (desiredUsername === "user"){
             usernameAvailable = true;
         }
     });
@@ -48,10 +48,10 @@ $(document).ready(function(){
         }
     });
 
-    function isSignUpFormValid(){
+    async function isSignUpFormValid(){
         isValid = true;
         // Check if Username is available
-        $.ajax({
+        await $.ajax({
             url: "https://cst438-project2-groupa-front.herokuapp.com/users/allUsers",
             success: function(result) {
                 $("#SignUpSuccess").html('<span id ="SignUpSuccess">' + result + '</span> <br><br>');
