@@ -1,3 +1,6 @@
+const express = require('express');
+const app = express();
+
 $(document).ready(function(){
 
     //var usernameAvailable = false;
@@ -48,6 +51,13 @@ $(document).ready(function(){
         }
         //isSignUpFormValid();
     });
+
+    app.post('/signup', async function(req, res){
+        let username = req.body.username;
+        let password = req.body.password;
+        //console.log("username: " + username);
+        //console.log("password: " + password);
+    })
 
     async function isSignUpFormValid(){
         isValid = true;
