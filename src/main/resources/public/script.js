@@ -56,6 +56,7 @@ $(document).ready(function(){
             success: function(result) {
                 $("#SignUpSuccess").html('<span id ="SignUpSuccess">' + result + '</span> <br><br>');
                 alert("Usernames: " + result);
+                console.log(result);
             }
         });
 
