@@ -14,7 +14,7 @@ $(document).ready(function(){
     });
 
     $("#loginForm").on("submit", function(event){
-        alert("Submitting form...");
+        alert("Submitting Login form...");
         if(!isLoginFormValid()){
             event.preventDefault();
         }
@@ -49,12 +49,13 @@ $(document).ready(function(){
     });
 
     function isSignUpFormValid(){
-        isValid = false;
+        isValid = true;
         // Check if Username is available
         $.ajax({
             url: "https://cst438-project2-groupa-front.herokuapp.com/users/allUsers",
             success: function(result) {
                 $("#SignUpSuccess").html('<span id ="SignUpSuccess">' + result + '</span> <br><br>');
+                alert("Usernames: " + result);
             }
         });
 
