@@ -13,7 +13,7 @@ public interface UserDAO extends JpaRepository<UserDB, Long> {
     UserDB findUserByname(String username);
 
     @Modifying
-    @Query("INSERT into UserDB (username,password) VALUES (username,password)", nativeQuery = true)
-    UserDB insertUser(String username, String password);
+    @Query(value = "INSERT into UserDB (username,password) VALUES (:username,:password)", nativeQuery = true)
+    UserDB insertUser(@Param("username") String username, @Param("password") String password);
 
 }
