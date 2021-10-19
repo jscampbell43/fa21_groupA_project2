@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-    var usernameAvailable = false;
+    //var usernameAvailable = false;
 
     $("#userName").on("change", async function(){
         alert($("#username").val());
@@ -43,10 +43,10 @@ $(document).ready(function(){
 
     $("#signupForm").on("submit", function(event){
         alert("Submitting Signup form...");
-        // if(!isSignUpFormValid()){
-        event.preventDefault();
-        // }
-        isSignUpFormValid();
+        if(!isSignUpFormValid()){
+            event.preventDefault();
+        }
+        //isSignUpFormValid();
     });
 
     async function isSignUpFormValid(){
@@ -58,14 +58,19 @@ $(document).ready(function(){
                 $("#SignUpSuccess").html('<span id ="SignUpSuccess">' + result + '</span> <br><br>');
                 alert("Usernames: " + result);
                 console.log(result);
+                for(user in result){
+                    if($("#username").val() == user){
+                        isValid = false;
+                    }
+                }
             }
         });
 
-        if(!usernameAvailable){
-            isValid = false;
-            $("#usernameError").html("Username is Not Available");
-            $("#usernameError").css("color", "red");
-        }
+        // if(!usernameAvailable){
+        //     isValid = false;
+        //     $("#usernameError").html("Username is Not Available");
+        //     $("#usernameError").css("color", "red");
+        // }
         // Check if Username field is blank
         if($("#username").val().length == 0){
             isValid = false;
@@ -79,6 +84,7 @@ $(document).ready(function(){
             isValid = false;
         }
         // Create account
+
 
         return isValid;
     }
