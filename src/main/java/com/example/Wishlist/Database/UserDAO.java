@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface UserDAO extends JpaRepository<UserDB, Long> {
 
-    @Query("FROM UserDB WHERE username = ?1")
-    UserDB findUserByname(String username);
+    @Query("FROM UserDB WHERE id = ?1")
+    UserDB findUserByUserId(int user_id);
 
 }

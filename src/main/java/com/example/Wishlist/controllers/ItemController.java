@@ -26,8 +26,8 @@ public class ItemController {
         return itemDAO.findAll();
     }
     @GetMapping(value = "/itemSearch")
-    public List<ItemDB> getItemById(@PathVariable int user_id){
-        return itemDAO.findItemByUser(user_id);
+    public List<ItemDB> searchItem(@PathVariable String item_name){
+        return itemDAO.findItemBySearch(item_name);
     }
 //    @Query("FROM ItemDB WHERE user_id = ?1")
 //    List<ItemDB> findItemByUser(int user_id);

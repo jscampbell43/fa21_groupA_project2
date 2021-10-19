@@ -2,6 +2,7 @@ package com.example.Wishlist.Database;
 
 
 import javax.persistence.*;
+import java.util.Set;
 
 
 @Table(name="USERS")
@@ -26,6 +27,15 @@ public class UserDB {
     public UserDB() {
     }
 
+    public Set<ItemDB> getUserItems() {
+        return userItems;
+    }
+
+    public void setUserItems(Set<ItemDB> userItems) {
+        this.userItems = userItems;
+    }
+
+    private Set<ItemDB> userItems;
     public int getUser_id() {
         return user_id;
     }
