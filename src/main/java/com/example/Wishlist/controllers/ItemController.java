@@ -36,7 +36,6 @@ public class ItemController {
 
     @RequestMapping(value = "/list/{list_name}/user/{user_id}")
     public List<ItemDB> getItemsByList(@PathVariable String list_name, @PathVariable int user_id) {return  itemDAO.findItemByList(list_name, user_id);}
-    }
+}
 //    @Query("FROM ItemDB WHERE user_id = ?1")
 //    List<ItemDB> findItemByUser(int user_id);
-}
