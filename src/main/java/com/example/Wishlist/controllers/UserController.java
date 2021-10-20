@@ -33,7 +33,7 @@ public class UserController {
     }
     @PostMapping("/saveItemToWishlist")
     public void saveItemToWishlist(HttpServletResponse response) {
-        UserDB  user = userDAO.findUserByUserId(response.getHeader(user_id)));
+        UserDB  user = userDAO.findUserByUserId(response.getHeader(user_id));
     }
 
 
