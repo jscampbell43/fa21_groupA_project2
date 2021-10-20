@@ -31,10 +31,10 @@ public class UserController {
         UserDB user = userDAO.findUserByUserId(user_id);
         return user.getUserItems();
     }
-    @PostMapping("/saveItemToWishlist")
-    public void saveItemToWishlist(HttpServletResponse response) {
-        UserDB  user = userDAO.findUserByUserId(response.getHeader(user_id));
-    }
+    // @PostMapping("/saveItemToWishlist")
+    // public void saveItemToWishlist(HttpServletResponse response) {
+    //     UserDB  user = userDAO.findUserByUserId(response.getHeader(user_id));
+    // }
 
 
     @GetMapping(value = "/{username}")
