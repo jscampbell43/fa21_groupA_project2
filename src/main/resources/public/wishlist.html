@@ -1,24 +1,34 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Login Page</title>
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
 <body>
 
     <h1>Wishlist</h1>
     <br>
 
     <nav>
-        <a href="homeUser.html">Home</a>
-        <a href="wishlist.html"><span>Wishlist</span></a>
+        <a href="homeUser.html"><span>Home</span></a>
+        <a href="wishlist.html">Wishlist</a>
+        <a href="addItem.html"><span>Add Item</span></a>
         <a href="editAccount.html">Edit Account</a>
     </nav>
     <br>
 
-    <p>List will be displayed here</p>
+    <p>Your Lists:</p>
     <br>
+    <div id="wishlistsDiv"></div>
 
     <p>Enter a name in the Search Box below to view a Specific List</p>
     <br>
-    Search: <input type = "text" id = "searchLists">
+    Search: <input type = "text" id = "searchLists"> <button id="searchButton">Search</button>
     <br>
 
+    <script src="wishlist.js"></script>
 </body>
 </html>
