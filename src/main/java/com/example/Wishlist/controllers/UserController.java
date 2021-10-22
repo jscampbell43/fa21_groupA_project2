@@ -42,8 +42,8 @@ public class UserController {
         return userDAO.findUserByName(username);
     }
 
-    // @PostMapping(value = "/signup")
-    // @ResponseBody
-    // public void insertNewUser(@RequestParam String username, @RequestParam String password){userDAO.insertUser(username, password);}
+    @PostMapping(value = "/signup")
+     @ResponseBody
+     public void insertNewUser(@RequestParam String username, @RequestParam String password){userDAO.insertUser(username, password); }
     
 }
