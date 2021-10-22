@@ -35,8 +35,9 @@ public class ItemController {
     @RequestMapping(value = "/list/{list_name}/user/{user_id}")
     public List<ItemDB> getItemsByList(@PathVariable String list_name, @PathVariable int user_id) {return  itemDAO.findItemByList(list_name, user_id);}
 
-    @RequestMapping(value = "/additem")
-    public void addItem(@RequestParam int id, @RequestParam String name, @RequestParam String desc, @RequestParam String link, @RequestParam String image, @RequestParam String list) {
+    @RequestMapping(value = "/additem", method = RequestMethod.POST)
+    @ResponseBody
+    public void addItem(@RequestParam int id, @RequestParam String name, @RequestParam(required = false, defaultValue = "Description Goes Here") String desc, @RequestParam(required = false, defaultValue = "https://www.google.com/") String link, @RequestParam(required = false, defaultValue = "https://via.placeholder.com/150/") String image, @RequestParam String list) {
         itemDAO.addItem(id, name, desc, link, image, list);
     }
 
