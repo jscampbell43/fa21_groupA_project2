@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up Page</title>
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+<h1>Home</h1>
+<br>
+
+<nav>
+    <a href="homeUser.html"><span>Home</span></a>
+    <a href="wishlist.html">Wishlist</a>
+    <a href="addItem.html"><span>Add Item</span></a>
+    <a href="editAccount.html">Edit Account</a>
+</nav>
+<br>
+
+<h1>Add Item</h1>
+<form id = "itemForm" action = "">
+    <p>Please enter item details</p>
+    <br>
+
+    Name: <input type = "text" id = "itemName">
+    <br>
+    <span id="nameError"></span><br>
+
+    Description (Optional): <input type = "text" id = "itemDesc">
+    <br>
+
+    Link to Item (Optional): <input type = "text" id = "itemLink">
+    <br>
+
+    Link to Image (Optional): <input type = "text" id = "itemImage">
+    <br>
+
+    Name of the list: <input type = "text" id = "itemList">
+    <br>
+    <span id="listError"></span><br>
+
+    <input type = "submit" value = "Add Item">
+    <br>
+</form>
+
+<script src="addItem.js"></script>
+</body>
+</html>

@@ -26,20 +26,20 @@ public class UserController {
     public List<UserDB> getAllUsers(){return userDAO.findAll();}
 
 
-    @GetMapping(value = "/allSavedItems")
+   /* @GetMapping(value = "/allSavedItems")
     public Set<ItemDB> getAllSavedItems(@PathVariable int user_id){
         UserDB user = userDAO.findUserByUserId(user_id);
         return user.getUserItems();
-    }
-    @PostMapping("/saveItemToWishlist")
+    }*/
+    /*@PostMapping("/saveItemToWishlist")
     public void saveItemToWishlist(HttpServletResponse response, ) {
         UserDB  user = userDAO.findUserByUserId()
-    }
+    }*/
 
 
     @GetMapping(value = "/{username}")
     public UserDB findUserByName(@PathVariable String username){
-        return userDAO.findUserByname(username);
+        return userDAO.findUserByName(username);
     }
 
     // @PostMapping(value = "/signup")

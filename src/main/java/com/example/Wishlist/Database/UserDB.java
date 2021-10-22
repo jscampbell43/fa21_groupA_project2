@@ -27,15 +27,15 @@ public class UserDB {
     public UserDB() {
     }
 
-    public Set<ItemDB> getUserItems() {
+   /* public Set<ItemDB> getUserItems() {
         return userItems;
-    }
+    }*/
 
-    public void setUserItems(Set<ItemDB> userItems) {
+   /* public void setUserItems(Set<ItemDB> userItems) {
         this.userItems = userItems;
-    }
+    }*/
 
-    private Set<ItemDB> userItems;
+   // private Set<ItemDB> userItems;
     public int getUser_id() {
         return user_id;
     }

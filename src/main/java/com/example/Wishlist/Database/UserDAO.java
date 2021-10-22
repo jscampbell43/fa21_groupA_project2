@@ -12,6 +12,9 @@ public interface UserDAO extends JpaRepository<UserDB, Long> {
     @Query("FROM UserDB WHERE id = ?1")
     UserDB findUserByUserId(int user_id);
 
+    @Query("FROM UserDB WHERE username = ?1")
+    UserDB findUserByName(String username);
+
     // @Modifying
     // @Query(value = "INSERT into UserDB (username,password) VALUES (:username,:password)", nativeQuery = true)
     // UserDB insertUser(String username, String password);
