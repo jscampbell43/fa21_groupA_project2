@@ -18,7 +18,7 @@ $(document).ready(function(){
             data: {username: username, password: password},
             success: function() {
                 alert("User Successfully added!");
-                //window.location.href='/';
+                //window.location.replace("/index.html");
             },
             error: function() {
                 alert("Something went wrong, please try again");

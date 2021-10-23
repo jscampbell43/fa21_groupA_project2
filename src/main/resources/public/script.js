@@ -50,4 +50,7 @@ $(document).ready(function(){
         return isValid;
     }
 
+    $("#signUpBtn").on("click", function() {
+       window.location.href = "/signUp.html";
+    });
 });
