@@ -3,6 +3,8 @@ package com.example.Wishlist.controllers;
 
 import com.example.Wishlist.Database.ItemDAO;
 import com.example.Wishlist.Database.ItemDB;
+import com.example.Wishlist.service.ItemService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,10 @@ import java.util.stream.Collectors;
 public class ItemController {
     private List<ItemDB> item;
     private ItemDAO itemDAO;
+
+    @Autowired
+    private ItemService itemService;
+
     public ItemController(ItemDAO itemDAO){
         this.itemDAO = itemDAO;
     }
@@ -39,6 +45,15 @@ public class ItemController {
     @ResponseBody
     public void addItem(@RequestParam int id, @RequestParam String name, @RequestParam(required = false, defaultValue = "Description Goes Here") String desc, @RequestParam(required = false, defaultValue = "https://www.google.com/") String link, @RequestParam(required = false, defaultValue = "https://via.placeholder.com/150/") String image, @RequestParam String list) {
         itemDAO.addItem(id, name, desc, link, image, list);
+    }
+
+    @RequestMapping(value = "/updateItem", method = RequestMethod.PUT)
+    public String updateItem(@RequestBody ItemDB itemDB){
+        return itemService.updateItem(itemDB);
+    }
+    @RequestMapping(value = "/deleteItem", method = RequestMethod.DELETE)
+    public String deleteItem(@RequestBody ItemDB itemDB){
+        return itemService.deleteItem(itemDB);
     }
 
 //    @Query("FROM ItemDB WHERE user_id = ?1")
