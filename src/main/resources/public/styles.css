@@ -2,8 +2,6 @@ body, p, h1, form, button, br{
     background-color: black;
     text-align: center;
     color:rgb(189, 189, 189);
-    display: flex;
-    justify-content:center;
 }
 
 header, main, nav{
