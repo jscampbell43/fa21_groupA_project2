@@ -21,6 +21,7 @@ public class ItemService {
             itemToUpdate.setName(itemDB.getName());
             itemToUpdate.setDescription(itemDB.getDescription());
             itemToUpdate.setItem_link(itemDB.getItem_link());
+            itemToUpdate.setImg_url(itemDB.getImg_url());
             itemToUpdate.setList_name(itemDB.getList_name());
         });
         return "Item UPDATED";
