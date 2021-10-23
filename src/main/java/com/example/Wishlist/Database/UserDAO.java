@@ -1,10 +1,12 @@
 package com.example.Wishlist.Database;
 
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
-// import org.springframework.data.jpa.repository.Transactional;
-// import org.springframework.data.jpa.repository.Param;
+import org.springframework.data.repository.query.Param;
+
+import javax.transaction.Transactional;
 
 
 public interface UserDAO extends JpaRepository<UserDB, Long> {
@@ -15,8 +17,9 @@ public interface UserDAO extends JpaRepository<UserDB, Long> {
     @Query("FROM UserDB WHERE username = ?1")
     UserDB findUserByName(String username);
 
-    // @Modifying
-    // @Query(value = "INSERT into UserDB (username,password) VALUES (:username,:password)", nativeQuery = true)
-    // UserDB insertUser(String username, String password);
+    @Modifying
+    @Query(value = "INSERT INTO USERS (username,password) VALUES (:username,:password)", nativeQuery = true)
+    @Transactional
+    void insertUser(@Param("username") String username, @Param("password") String password);
 
 }
