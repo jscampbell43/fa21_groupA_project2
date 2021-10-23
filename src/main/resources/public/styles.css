@@ -1,0 +1,30 @@
+body, p, h1, form, button, br{
+    background-color: black;
+    text-align: center;
+    color:rgb(189, 189, 189);
+    display: flex;
+    justify-content:center;
+}
+
+header, main, nav{
+    padding:5px;
+    text-align: center;
+    font-family: 'Varela';
+    display: flex;
+    justify-content:center;
+}
+
+nav a{
+    padding:5px;
+    padding-left:20px;
+    padding-right:20px;
+    font-size: 1.2em;
+    text-decoration: none; /* Removes underline*/
+    color: rgb(150, 22, 22); /*links blue by default*/
+}
+
+nav a:hover{
+    border-top: 3px rgb(243, 49, 15) solid;
+    border-bottom: 3px rgb(243, 49, 15) solid;
+    transition: 1.2s;
+}
