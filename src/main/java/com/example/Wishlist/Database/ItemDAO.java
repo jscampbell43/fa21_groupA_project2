@@ -13,6 +13,9 @@ public interface ItemDAO extends JpaRepository<ItemDB, Long> {
     @Query("FROM ItemDB WHERE user_id = ?1")
     List<ItemDB> findItemByUser(int user_id);
 
+    @Query("FROM ItemDB WHERE id = ?1")
+    List<ItemDB> findByItemId(int id);
+
     @Query("FROM ItemDB WHERE list_name = ?1 AND user_id = ?2")
     List<ItemDB> findItemByList(String list_name, int user_id);
 
