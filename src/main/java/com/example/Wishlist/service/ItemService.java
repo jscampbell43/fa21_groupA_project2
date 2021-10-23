@@ -15,7 +15,7 @@ public class ItemService {
 
     @Transactional
     public String updateItem(ItemDB itemDB){
-        List<ItemDB> currentItem = itemDAO.findItemBySearch(itemDB.getName());
+        List<ItemDB> currentItem = itemDAO.findByItemId(itemDB.getId());
         currentItem.stream().forEach(s-> {
             ItemDB itemToUpdate = itemDAO.findItemBySearch(s.getName()).get(0);
             itemToUpdate.setName(itemDB.getName());

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -24,7 +25,13 @@ public class ItemController {
     public ItemController(ItemDAO itemDAO){
         this.itemDAO = itemDAO;
     }
-
+//        public ItemController(){
+//        List<ItemDB> items = new ArrayList<>();
+//        items.add(new ItemDB(1, "TESTITEM1", "IDKKKK", "NUN", "JNDSF", "DJKSDF"));
+//        itemDAO.add(items.get(0));
+////        items.add(new ItemDB(3, 3, "CST250"));
+////        items.add(new ItemDB(4, 4, "CST101"));
+//    }
     @RequestMapping(value = "/allItems")
     public List<ItemDB> getAllItems(){
         return itemDAO.findAll();
