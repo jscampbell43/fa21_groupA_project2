@@ -37,7 +37,7 @@ public class ItemController {
         return itemDAO.findAll();
     }
 
-    @GetMapping(value = "/itemSearch")
+    @GetMapping(value = "/itemSearch/{item_name}")
     public List<ItemDB> searchItem(@PathVariable String item_name) {
         return itemDAO.findItemBySearch(item_name);
     }
