@@ -39,7 +39,7 @@ public class ItemController {
 
     @GetMapping(value = "/itemSearch/{item_name}")
     public List<ItemDB> searchItem(@PathVariable String item_name) {
-        return itemDAO.findItemBySearch(item_name);
+        return itemDAO.findItemByName(item_name);
     }
 
     @RequestMapping(value = "/user/{user_id}")

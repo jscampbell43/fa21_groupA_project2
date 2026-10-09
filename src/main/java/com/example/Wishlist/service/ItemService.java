@@ -5,7 +5,7 @@ import com.example.Wishlist.Database.ItemDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -17,7 +17,7 @@ public class ItemService {
     public String updateItem(ItemDB itemDB){
         List<ItemDB> currentItem = itemDAO.findByItemId(itemDB.getId());
         currentItem.stream().forEach(s-> {
-            ItemDB itemToUpdate = itemDAO.findItemBySearch(s.getName()).get(0);
+            ItemDB itemToUpdate = itemDAO.findItemByName(s.getName()).get(0);
             itemToUpdate.setName(itemDB.getName());
             itemToUpdate.setDescription(itemDB.getDescription());
             itemToUpdate.setItem_link(itemDB.getItem_link());
@@ -29,7 +29,7 @@ public class ItemService {
 
     @Transactional
     public String deleteItem(ItemDB itemDB){
-        List<ItemDB> item = itemDAO.findItemBySearch(itemDB.getName());
+        List<ItemDB> item = itemDAO.findItemByName(itemDB.getName());
         item.stream().forEach(s-> {
             itemDAO.delete(s);
         });

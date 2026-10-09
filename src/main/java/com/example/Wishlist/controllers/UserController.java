@@ -8,8 +8,8 @@ import org.apache.catalina.User;
 import org.springframework.web.bind.annotation.*;
 
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;

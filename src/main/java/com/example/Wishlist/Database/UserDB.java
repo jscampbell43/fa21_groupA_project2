@@ -1,7 +1,7 @@
 package com.example.Wishlist.Database;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 
 

@@ -5,22 +5,22 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.List;
 
 public interface ItemDAO extends JpaRepository<ItemDB, Long> {
 
-    @Query("FROM ItemDB WHERE user_id = ?1")
+    @Query("SELECT i FROM ItemDB i WHERE i.user_id = ?1")
     List<ItemDB> findItemByUser(int user_id);
 
-    @Query("FROM ItemDB WHERE id = ?1")
+    @Query("SELECT i FROM ItemDB i WHERE i.id = ?1")
     List<ItemDB> findByItemId(int id);
 
-    @Query("FROM ItemDB WHERE list_name = ?1 AND user_id = ?2")
+    @Query("SELECT i FROM ItemDB i WHERE i.list_name = ?1 AND i.user_id = ?2")
     List<ItemDB> findItemByList(String list_name, int user_id);
 
-    @Query("FROM ItemDB WHERE name = ?1 OR id = ?1")
-    List<ItemDB> findItemBySearch(String entry);
+    @Query("SELECT i FROM ItemDB i WHERE i.name = ?1")
+    List<ItemDB> findItemByName(String name);
 
     @Modifying
     @Query(value = "INSERT INTO ITEMS (user_id, name, description, item_link, img_url, List_name) VALUES (:uid,:name,:description,:link,:url,:list)", nativeQuery = true)

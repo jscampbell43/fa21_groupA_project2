@@ -6,15 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 
 public interface UserDAO extends JpaRepository<UserDB, Long> {
 
-    @Query("FROM UserDB WHERE id = ?1")
+    @Query("SELECT u FROM UserDB u WHERE u.user_id = ?1")
     UserDB findUserByUserId(int user_id);
 
-    @Query("FROM UserDB WHERE username = ?1")
+    @Query("SELECT u FROM UserDB u WHERE u.username = ?1")
     UserDB findUserByName(String username);
 
     @Modifying
