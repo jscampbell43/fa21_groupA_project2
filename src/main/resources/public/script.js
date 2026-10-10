@@ -9,23 +9,6 @@ $(document).ready(function(){
         }
         let username = $("#loginUserName").val();
         let password = $("#loginPassword").val();
-        $.ajax({
-            url: "http://localhost:8080/users/" + username,
-            type: "GET",
-            async: false,
-            success:function(data) {
-                let dbUser = data.username;
-                let dbPass = data.password;
-                if (username==dbUser && password==dbPass) {
-                    alert("login Success");
-                    sessionStorage.setItem("user", data.user_id);
-                    //alert(sessionStorage.getItem("user"));
-                } else {
-                    action.preventDefault();
-                    alert("login failed");
-                }
-            }
-        });
     });
 
     function isFormValid(){

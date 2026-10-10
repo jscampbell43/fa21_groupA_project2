@@ -14,15 +14,15 @@
 
 <h1>Login</h1>
 <br>
-<form method = "GET" id = "loginForm" action = "homeUser.html">
+<form method = "POST" id = "loginForm" action = "/login">
     <p>Please enter your username and password</p>
     <br>
 
-    Username: <input type = "text" id = "loginUserName">
+    Username: <input type = "text" id = "loginUserName" name = "username">
     <br>
     <span id="usernameError"></span><br>
 
-    Password: <input type = "text" id = "loginPassword">
+    Password: <input type = "text" id = "loginPassword" name = "password">
     <br>
     <span id="passwordError"></span><br>
 
