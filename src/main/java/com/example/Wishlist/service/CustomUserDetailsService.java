@@ -17,15 +17,27 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
+        System.out.println("=== DEBUG: Attempting to load user: " + username);
         UserDB user = userDAO.findUserByName(username);
         if (user == null){
+            System.out.println("=== DEBUG: User not found in database: " + username);
             throw new UsernameNotFoundException("User Not Found!");
         }
-        return User.builder()
+        System.out.println("=== DEBUG: User found: " + user.getUsername());
+        System.out.println("=== DEBUG: Stored password hash: " + user.getPassword());
+        System.out.println("=== DEBUG: User role: " + user.getRole());
+        
+        UserDetails userDetails = User.builder()
             .username(user.getUsername())
             .password(user.getPassword())
-            .roles(user.getRole()) // or .authorities(...)
+            .roles(user.getRole())
             .build();
+        
+        System.out.println("=== DEBUG: UserDetails created with username: " + userDetails.getUsername());
+        System.out.println("=== DEBUG: UserDetails password: " + userDetails.getPassword());
+        System.out.println("=== DEBUG: UserDetails authorities: " + userDetails.getAuthorities());
+        
+        return userDetails;
     }
         
 }
