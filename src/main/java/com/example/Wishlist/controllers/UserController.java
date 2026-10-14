@@ -63,14 +63,33 @@ public class UserController {
     @PostMapping(value = "/signup")
      @ResponseBody
      public void insertNewUser(
-        @RequestParam String username, 
+        @RequestParam String username,
         @RequestParam String password,
         @RequestParam String role
         ){
         // Hash password before storing
         String hashedPassword = passwordEncoder.encode(password);
         String userRole = (role == null || role.isEmpty() ? "USER" : role);
-        userDAO.insertUser(username, hashedPassword, userRole); 
+        userDAO.insertUser(username, hashedPassword, userRole);
     }
-    
+
+    // POST /users/login - Authenticate a user
+    // Parameters: username, password
+    @PostMapping(value = "/login")
+    @ResponseBody
+    public String loginUser(
+        @RequestParam String username,
+        @RequestParam String password
+        ){
+        UserDB user = userDAO.findUserByName(username);
+        if (user == null) {
+            return "User not found";
+        }
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            return "Login successful";
+        } else {
+            return "Invalid password";
+        }
+    }
+
 }

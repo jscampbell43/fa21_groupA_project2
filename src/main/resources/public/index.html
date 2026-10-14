@@ -14,7 +14,7 @@
 
 <h1>Login</h1>
 <br>
-<form method = "POST" id = "loginForm" action = "/login">
+<form method = "POST" id = "loginForm">
     <p>Please enter your username and password</p>
     <br>
 
@@ -33,6 +33,8 @@
 <p>Or Click Sign Up to create a new account.</p>
 <button id = "signUpBtn">Sign Up</button>
 
-<script src="login.js"></script>
+    <script>
+        document.write('<script src="login.js?v=' + new Date().getTime() + '"><\/script>');
+    </script>
 </body>
 </html>

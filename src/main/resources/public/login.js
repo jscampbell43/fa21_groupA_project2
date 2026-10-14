@@ -3,12 +3,32 @@ $(document).ready(function(){
     var usernameAvailable = true;
 
     $("#loginForm").on("submit", function(action){
+        action.preventDefault(); // Prevent default form submission
         if(!isFormValid()){
-            action.preventDefault();
             return;
         }
         let username = $("#loginUserName").val();
         let password = $("#loginPassword").val();
+        console.log("Attempting login with username:", username);
+        $.ajax({
+            url: "http://localhost:8080/users/login",
+            type: "POST",
+            data: {username: username, password: password},
+            success: function(response) {
+                console.log("Login response:", response);
+                if (response === "Login successful") {
+                    alert("Login successful!");
+                    // Redirect to user home page
+                    window.location.href = "http://localhost:8080/homeUser.html";
+                } else {
+                    alert(response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log("Login failed:", xhr.status, error);
+                alert("Login failed. Error: " + xhr.status);
+            }
+        });
     });
 
     function isFormValid(){

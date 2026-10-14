@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration
-@EnableWebSecurity
+// @EnableWebSecurity // TEMPORARILY DISABLED FOR DEBUGGING
 public class SecurityConfig {
     
     @Autowired
@@ -42,7 +42,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // CSRF TOKENS DISABLED; ENABLE BEFORE COMPLETING APP
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll() // TEMPORARY: DISABLE ALL SECURITY FOR DEBUGGING
-            );
+            )
+            .formLogin(form -> form.disable()) // Disable default login page
+            .httpBasic(basic -> basic.disable()); // Disable basic auth
         
         return http.build();
     }
