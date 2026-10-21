@@ -23,6 +23,22 @@
     </nav>
     <br>
 
+    <button id="logoutBtn" class="btn btn-danger">Logout</button>
+    <br>
+
+    <script>
+        $("#logoutBtn").on("click", function() {
+            $.ajax({
+                url: "http://localhost:8080/users/logout",
+                type: "GET",
+                success: function(response) {
+                    window.location.href = "http://localhost:8080/customLogin.html";
+                }
+            });
+        });
+    </script>
+    <br>
+
     <p>Welcome to Wishlist!</p>
     <br>
 

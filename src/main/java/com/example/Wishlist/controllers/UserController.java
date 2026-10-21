@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -17,6 +18,11 @@ import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.Collections;
 
 // REST Controller for handling user-related HTTP requests
 // Base path: /users
@@ -73,7 +79,7 @@ public class UserController {
         userDAO.insertUser(username, hashedPassword, userRole);
     }
 
-    // POST /users/login - Authenticate a user
+    // POST /users/login - Authenticate a user (manual authentication for custom login page)
     // Parameters: username, password
     @PostMapping(value = "/login")
     @ResponseBody
@@ -86,10 +92,25 @@ public class UserController {
             return "User not found";
         }
         if (passwordEncoder.matches(password, user.getPassword())) {
+            // Create authentication token
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                username,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             return "Login successful";
         } else {
             return "Invalid password";
         }
+    }
+
+    // GET /logout - Manual logout handler
+    @GetMapping(value = "/logout")
+    @ResponseBody
+    public String logoutUser() {
+        SecurityContextHolder.clearContext();
+        return "Logout successful";
     }
 
 }

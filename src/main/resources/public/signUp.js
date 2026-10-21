@@ -2,28 +2,23 @@ $(document).ready(function(){
 
 
     $("#signupForm").on("submit", function(action){
-        console.log("Form submitted");
         action.preventDefault(); // Prevent default form submission
         if(!isFormValid()){
-            console.log("Form validation failed");
             return;
         }
         let id = sessionStorage.getItem("user");
         let username = $("#username").val();
         let password = $("#password").val();
         let passwordAgain = $("#passwordAgain").val();
-        console.log("Attempting signup with username:", username);
         $.ajax({
             url: "http://localhost:8080/users/signup",
             type: "POST",
             data: {username: username, password: password, role: "USER"},
             success: function() {
-                console.log("Signup successful");
                 alert("User Successfully added!");
                 window.location.href = "http://localhost:8080/index.html";
             },
             error: function(xhr, status, error) {
-                console.log("Signup failed:", xhr.status, error);
                 alert("Something went wrong, please try again. Error: " + xhr.status);
             }
         });

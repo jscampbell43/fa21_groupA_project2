@@ -23,6 +23,23 @@
 </nav>
 <br>
 
+<button id="logoutBtn" class="btn btn-danger">Logout</button>
+<br>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $("#logoutBtn").on("click", function() {
+        $.ajax({
+            url: "http://localhost:8080/users/logout",
+            type: "GET",
+            success: function(response) {
+                window.location.href = "http://localhost:8080/customLogin.html";
+            }
+        });
+    });
+</script>
+<br>
+
 <h1>Add Item</h1>
 <form id = "itemForm" action = "">
     <p>Please enter item details</p>

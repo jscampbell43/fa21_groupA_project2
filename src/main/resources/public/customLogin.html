@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Login</title>
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <!-- JQuery link -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!--Bootstrap files Link-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="text-center mt-5">Login</h1>
+                <br>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                    </div>
+                    <br>
+
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                    </div>
+                    <br>
+
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <br>
+
+                <div class="text-center">
+                    <p>Don't have an account? <a href="signUp.html">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $("#loginForm").on("submit", function(event) {
+            event.preventDefault();
+            let username = $("#username").val();
+            let password = $("#password").val();
+            $.ajax({
+                url: "http://localhost:8080/users/login",
+                type: "POST",
+                data: {username: username, password: password},
+                success: function(response) {
+                    if (response === "Login successful") {
+                        window.location.href = "http://localhost:8080/homeUser.html";
+                    } else {
+                        alert(response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert("Login failed. Error: " + xhr.status);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
