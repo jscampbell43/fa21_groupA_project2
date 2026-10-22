@@ -14,10 +14,23 @@ This file tracks progress and context for Devin sessions working on this project
 - jQuery/Ajax for frontend
 - Bootstrap for styling
 
-## Current State (Last Updated: 2026-10-14)
+## Current State (Last Updated: 2026-10-21)
 
 ### Recently Completed Work
-1. **Authentication System Fixed** (2026-10-14 session)
+1. **Frontend Migration to React + Vite** (2026-10-21 session)
+   - Created React frontend with Vite build system in `frontend/` directory
+   - Installed modern dependencies: React 19.3.1, React Router 7.18.4, Axios, Tailwind CSS 3.4.19
+   - Configured Vite dev server with proxy to Spring Boot backend
+   - Fixed Tailwind CSS compatibility (downgraded from v4 to v3.4.19)
+   - Fixed API data format: backend uses @RequestParam (form-encoded), not JSON
+   - Created all React components: Login, Signup, Home, Wishlist, AddItem, EditAccount
+   - Created shared Navigation component for consistent UI
+   - All components use modern React patterns (hooks, functional components)
+   - All components styled with Tailwind CSS
+   - Backend remains unchanged (Spring Boot + SQLite + manual authentication)
+   - Authentication flow working: signup → login → access protected pages → logout
+
+2. **Authentication System Fixed** (2026-10-14 session)
    - Temporarily disabled Spring Security auto-configuration for debugging (application.properties)
    - Fixed signup form - removed default action to prevent double submission
    - Added missing `role` parameter to signup API call
@@ -41,13 +54,14 @@ This file tracks progress and context for Devin sessions working on this project
 
 4. **Core Features Implemented**
    - User signup and login with password hashing ✅ WORKING
-   - Add items to wishlist
-   - Update existing items
-   - Delete items
-   - View all user items
-   - Search/filter items by list name
-   - Search items by item name
-   - CSS styling with Bootstrap integration
+   - Add items to wishlist ✅ WORKING (React frontend)
+   - Update existing items ✅ WORKING (legacy HTML)
+   - Delete items ✅ WORKING (legacy HTML)
+   - View all user items ✅ WORKING (React frontend)
+   - Search/filter items by list name ✅ WORKING (React frontend)
+   - Search items by item name ✅ WORKING (legacy HTML)
+   - CSS styling with Tailwind CSS ✅ NEW (React frontend)
+   - CSS styling with Bootstrap ✅ LEGACY (static HTML - being replaced)
 
 ### Backend Structure
 - **Controllers:**
@@ -68,17 +82,42 @@ This file tracks progress and context for Devin sessions working on this project
   - `SecurityConfig.java` - Spring Security configuration
   - `WishlistApplication.java` - Main application with PasswordEncoder bean
 
-### Frontend Structure (src/main/resources/public/)
-- `index.html` - Landing page
-- `login.js` - Login functionality
-- `signUp.html` + `signUp.js` - User registration
-- `homeUser.html` + `homeUser.js` - User dashboard
-- `homeAdmin.html` - Admin dashboard
-- `addItem.html` + `addItem.js` - Add items to wishlist
-- `wishlist.html` + `wishlist.js` - View wishlist with search
-- `viewUsers.html` - View all users (admin)
-- `editAccount.html` - Edit user account
-- `styles.css` - Custom styling
+### Frontend Structure
+**React Frontend (NEW - 2026-10-21):**
+- Location: `frontend/` directory
+- Build tool: Vite
+- Framework: React 19.3.1
+- Routing: React Router 7.18.4
+- HTTP Client: Axios
+- Styling: Tailwind CSS 3.4.19
+- Pages:
+  - `Login.jsx` - Login page with form validation
+  - `Signup.jsx` - Signup page with password confirmation
+  - `Home.jsx` - User dashboard
+  - `Wishlist.jsx` - View wishlist items with search
+  - `AddItem.jsx` - Add new item to wishlist
+  - `EditAccount.jsx` - Edit user account
+- Components:
+  - `Navigation.jsx` - Shared navigation bar
+- Services:
+  - `api.js` - Axios API service for backend communication
+- Dev server: http://localhost:5173 (proxies API calls to http://localhost:8080)
+
+**Legacy Frontend (OLD - being replaced):**
+- Location: `src/main/resources/public/`
+- jQuery/Ajax for frontend
+- Bootstrap for styling
+- Static HTML files:
+  - `index.html` - Landing page
+  - `login.js` - Login functionality
+  - `signUp.html` + `signUp.js` - User registration
+  - `homeUser.html` + `homeUser.js` - User dashboard
+  - `homeAdmin.html` - Admin dashboard
+  - `addItem.html` + `addItem.js` - Add items to wishlist
+  - `wishlist.html` + `wishlist.js` - View wishlist with search
+  - `viewUsers.html` - View all users (admin)
+  - `editAccount.html` - Edit user account
+  - `styles.css` - Custom styling
 
 ### Database
 - SQLite database: `WishlistDatabase.db`
@@ -116,6 +155,28 @@ This file tracks progress and context for Devin sessions working on this project
 
 ## Session History
 
+### Session 2026-10-21 (Frontend Migration to React)
+- Created React frontend with Vite build system in `frontend/` directory
+- Installed dependencies: React, React Router, Axios, Tailwind CSS v3, PostCSS, Autoprefixer
+- Configured Vite dev server on port 5173 with proxy to Spring Backend (port 8080)
+- Fixed Tailwind CSS v4 compatibility issue by downgrading to v3.4.19
+- Fixed API data format issue: backend uses @RequestParam (form-encoded), not JSON
+  - Updated API service to send form-encoded data instead of JSON
+  - Added Content-Type: application/x-www-form-urlencoded header
+- Created React components:
+  - Login.jsx - login form with validation, error handling, redirects to /home
+  - Signup.jsx - signup form with password confirmation, validation, auto-redirect
+  - Home.jsx - user dashboard with navigation and logout
+  - Wishlist.jsx - displays items, search by list name, loading/error states
+  - AddItem.jsx - add item form with validation, success message
+  - EditAccount.jsx - edit account form (update/delete marked as needs backend implementation)
+  - Navigation.jsx - shared navigation component with active page highlighting
+- All components use modern React patterns: useState, useEffect, useNavigate
+- All components styled with Tailwind CSS
+- Backend remains unchanged (Spring Boot + SQLite + manual authentication)
+- Frontend and backend running in parallel: React on 5173, Spring Boot on 8080
+- Authentication flow working: signup → login → access protected pages → logout
+
 ### Session 2026-10-14 (Part 3 - Spring Security Configuration)
 - Attempted to re-enable Spring Security with form-based authentication
 - Encountered 403 Forbidden errors with Spring Security's default login
@@ -149,13 +210,49 @@ This file tracks progress and context for Devin sessions working on this project
 - Reviewed git history and codebase structure
 - Set up periodic reminder system for documenting progress
 
+### Session 2026-10-21 (Frontend Migration to React)
+- Created React frontend with Vite build system in `frontend/` directory
+- Installed dependencies: React, React Router, Axios, Tailwind CSS v3, PostCSS, Autoprefixer
+- Configured Vite dev server on port 5173 with proxy to Spring Backend (port 8080)
+- Fixed Tailwind CSS v4 compatibility issue by downgrading to v3.4.19
+- Fixed API data format issue: backend uses @RequestParam (form-encoded), not JSON
+  - Updated API service to send form-encoded data instead of JSON
+  - Added Content-Type: application/x-www-form-urlencoded header
+- Created React components:
+  - Login.jsx - login form with validation, error handling, redirects to /home
+  - Signup.jsx - signup form with password confirmation, validation, auto-redirect
+  - Home.jsx - user dashboard with navigation and logout
+  - Wishlist.jsx - displays items, search by list name, loading/error states
+  - AddItem.jsx - add item form with validation, success message
+  - EditAccount.jsx - edit account form (update/delete marked as needs backend implementation)
+  - Navigation.jsx - shared navigation component with active page highlighting
+- All components use modern React patterns: useState, useEffect, useNavigate
+- All components styled with Tailwind CSS
+- Backend remains unchanged (Spring Boot + SQLite + manual authentication)
+- Frontend and backend running in parallel: React on 5173, Spring Boot on 8080
+- Authentication flow working: signup → login → access protected pages → logout
+
 ---
 
 ## Build & Run Commands
+**Backend (Spring Boot):**
 ```bash
 cd fa21_groupA_project2
 ./mvnw spring-boot:run
 ```
+
+**Frontend (React + Vite):**
+```bash
+cd fa21_groupA_project2/frontend
+npm run dev          # Development server with hot reload
+npm run build        # Production build
+npm run preview      # Preview production build
+```
+
+**For Development (both running):**
+- Terminal 1: Run Spring Boot backend on port 8080
+- Terminal 2: Run React frontend on port 5173
+- React proxies API calls to Spring Boot backend
 
 ## Testing Commands
 ```bash
@@ -172,9 +269,22 @@ cd fa21_groupA_project2
   - This allows using Spring Security's password utilities without web security filters
   - CSRF is disabled - enable before production
   - To fully enable Spring Security form login: remove auto-configuration exclusion, configure SecurityFilterChain with custom login page
-- Frontend uses jQuery/Ajax - check browser console for API errors
-- JavaScript caching issues resolved with dynamic versioning (timestamps)
-- Database changes need to be committed before major work
+- **Frontend Migration (React + Vite):**
+  - New React frontend in `frontend/` directory replacing jQuery/static HTML
+  - React dev server runs on port 5173, proxies API calls to Spring Boot on port 8080
+  - Uses form-encoded data for API calls (backend uses @RequestParam)
+  - Tailwind CSS v3.4.19 configured with PostCSS
+  - React Router for client-side routing
+  - User ID currently stored in sessionStorage as placeholder (needs proper auth state)
+  - Legacy static HTML files in `src/main/resources/public/` still exist but not used by React app
+- **API Data Format:**
+  - Backend endpoints use @RequestParam (form-encoded data)
+  - Frontend Axios service sends form-encoded data (application/x-www-form-urlencoded)
+  - Do NOT send JSON - it will result in 400 Bad Request errors
+- **Known Limitations:**
+  - EditAccount update/delete functionality needs backend endpoints to be implemented
+  - User authentication state needs proper implementation (currently using sessionStorage placeholder)
+  - EditAccount update/delete buttons show message "needs backend implementation"
 
 ---
 
@@ -272,11 +382,15 @@ The application needs modernization to align with current best practices. The ba
 
 ### Recommended Phased Approach
 
-#### Phase 1: Frontend Framework Migration (START HERE)
-1. Set up React with Vite
-2. Create basic components for login, signup, home, wishlist
-3. Integrate with existing backend API
-4. Replace static HTML pages with React components
+#### Phase 1: Frontend Framework Migration ✅ COMPLETED (2026-10-21)
+1. ✅ Set up React with Vite
+2. ✅ Create basic components for login, signup, home, wishlist
+3. ✅ Integrate with existing backend API
+4. ✅ Replace static HTML pages with React components
+   - All pages now use React components with modern patterns
+   - Tailwind CSS configured and working
+   - API service with form-encoded data working
+   - Client-side routing with React Router working
 
 #### Phase 2: Backend API Polish
 1. Implement proper REST API design
