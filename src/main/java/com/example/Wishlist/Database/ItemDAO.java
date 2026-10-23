@@ -34,5 +34,11 @@ public interface ItemDAO extends JpaRepository<ItemDB, Long> {
     @Modifying
     @Query(value = "INSERT INTO ITEMS (user_id, name, description, item_link, img_url, List_name) VALUES (:uid,:name,:description,:link,:url,:list)", nativeQuery = true)
     @Transactional
-    void addItem(@Param("uid") int user_id, @Param("name") String name, @Param("description") String desc, @Param("link") String link, @Param("url") String url, @Param("list") String list);
+    void addItem(
+        @Param("uid") int user_id, 
+        @Param("name") String name, 
+        @Param("description") String desc, 
+        @Param("link") String link, 
+        @Param("url") String url, 
+        @Param("list") String list);
 }

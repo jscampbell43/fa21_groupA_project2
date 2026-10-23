@@ -55,13 +55,22 @@ public class ItemController {
 
     // GET /items/list/{list_name}/user/{user_id} - Get items from a specific list for a user
     @RequestMapping(value = "/list/{list_name}/user/{user_id}")
-    public List<ItemDB> getItemsByList(@PathVariable String list_name, @PathVariable int user_id) {return  itemDAO.findItemByList(list_name, user_id);}
+    public List<ItemDB> getItemsByList(
+        @PathVariable String list_name, 
+        @PathVariable int user_id) 
+        {return  itemDAO.findItemByList(list_name, user_id);}
 
     // POST /items/additem - Add a new item to the database
     // Parameters: id, name, description (optional), link (optional), image (optional), list name
     @RequestMapping(value = "/additem", method = RequestMethod.POST)
     @ResponseBody
-    public void addItem(@RequestParam int id, @RequestParam String name, @RequestParam(required = false, defaultValue = "Description Goes Here") String desc, @RequestParam(required = false, defaultValue = "https://www.google.com/") String link, @RequestParam(required = false, defaultValue = "https://via.placeholder.com/150/") String image, @RequestParam String list) {
+    public void addItem(
+        @RequestParam int id, 
+        @RequestParam String name, 
+        @RequestParam(required = false, defaultValue = "Description Goes Here") String desc, 
+        @RequestParam(required = false, defaultValue = "https://www.google.com/") String link, 
+        @RequestParam(required = false, defaultValue = "https://via.placeholder.com/150/") String image, 
+        @RequestParam String list) {
         itemDAO.addItem(id, name, desc, link, image, list);
     }
 

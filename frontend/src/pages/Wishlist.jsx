@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { itemAPI, userAPI } from '../services/api'
+import { itemAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation'
 
 function Wishlist() {
@@ -9,10 +10,8 @@ function Wishlist() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-
-  // For now, we'll use a placeholder user ID
-  // In a real app, this would come from authentication state
-  const userId = sessionStorage.getItem('user') || '1'
+  const { userId, logout } = useAuth()
+  const finalUserId = userId || '1'
 
   useEffect(() => {
     loadItems()
@@ -22,7 +21,7 @@ function Wishlist() {
     setLoading(true)
     setError('')
     try {
-      const response = await itemAPI.getItemByUser(userId)
+      const response = await itemAPI.getItemByUser(finalUserId)
       setItems(response.data)
     } catch (err) {
       setError('Failed to load items')
@@ -41,7 +40,7 @@ function Wishlist() {
     setLoading(true)
     setError('')
     try {
-      const response = await itemAPI.getItemByList(searchTerm, userId)
+      const response = await itemAPI.getItemByList(searchTerm, finalUserId)
       setItems(response.data)
     } catch (err) {
       setError('Failed to search items')
@@ -52,13 +51,8 @@ function Wishlist() {
   }
 
   const handleLogout = async () => {
-    try {
-      await userAPI.logout()
-      navigate('/')
-    } catch (err) {
-      console.error('Logout error:', err)
-      navigate('/')
-    }
+    await logout()
+    navigate('/')
   }
 
   return (

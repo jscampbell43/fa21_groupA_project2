@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { userAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 function Signup() {
   const [username, setUsername] = useState('')
@@ -10,6 +10,7 @@ function Signup() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { signup } = useAuth()
 
   const validateForm = () => {
     if (!username.trim()) {
@@ -32,6 +33,11 @@ function Signup() {
     e.preventDefault()
     setSuccess('')
 
+    // Prevent multiple submissions
+    if (loading) {
+      return
+    }
+
     if (!validateForm()) {
       return
     }
@@ -39,11 +45,15 @@ function Signup() {
     setLoading(true)
 
     try {
-      await userAPI.signup(username, password, 'USER')
-      setSuccess('User successfully added! Redirecting to login...')
-      setTimeout(() => {
-        navigate('/')
-      }, 2000)
+      const result = await signup(username, password, 'USER')
+      if (result.success) {
+        setSuccess('User successfully added! Redirecting to login...')
+        setTimeout(() => {
+          navigate('/')
+        }, 2000)
+      } else {
+        setError(result.message || 'Signup failed')
+      }
     } catch (err) {
       setError('Something went wrong, please try again.')
       console.error('Signup error:', err)
@@ -81,7 +91,6 @@ function Signup() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
-              required
             />
           </div>
 
@@ -96,7 +105,6 @@ function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
-              required
             />
           </div>
 
@@ -111,13 +119,12 @@ function Signup() {
               value={passwordAgain}
               onChange={(e) => setPasswordAgain(e.target.value)}
               placeholder="Confirm password"
-              required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={loading}
           >
             {loading ? 'Signing up...' : 'Sign up!'}

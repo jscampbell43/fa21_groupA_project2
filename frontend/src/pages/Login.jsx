@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { userAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 function Login() {
   const [username, setUsername] = useState('')
@@ -8,18 +8,42 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
+
+  const validateForm = () => {
+    if (!username.trim()) {
+      setError('Username is required')
+      return false
+    }
+    if (!password) {
+      setError('Password is required')
+      return false
+    }
+    setError('')
+    return true
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+
+    // Prevent multiple submissions
+    if (loading) {
+      return
+    }
+
+    if (!validateForm()) {
+      return
+    }
+
     setLoading(true)
 
     try {
-      const response = await userAPI.login(username, password)
-      if (response.data === 'Login successful') {
+      const result = await login(username, password)
+      if (result.success) {
         navigate('/home')
       } else {
-        setError(response.data || 'Login failed')
+        setError(result.message || 'Login failed')
       }
     } catch (err) {
       setError('Login failed. Please check your credentials.')
@@ -52,7 +76,6 @@ function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
-              required
             />
           </div>
 
@@ -67,13 +90,12 @@ function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
-              required
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}

@@ -68,15 +68,22 @@ public class UserController {
     // Parameters: username, password
     @PostMapping(value = "/signup")
      @ResponseBody
-     public void insertNewUser(
+     public String insertNewUser(
         @RequestParam String username,
         @RequestParam String password,
         @RequestParam String role
         ){
+        // Check if username already exists
+        UserDB existingUser = userDAO.findUserByName(username);
+        if (existingUser != null) {
+            return "Username already exists";
+        }
+
         // Hash password before storing
         String hashedPassword = passwordEncoder.encode(password);
         String userRole = (role == null || role.isEmpty() ? "USER" : role);
         userDAO.insertUser(username, hashedPassword, userRole);
+        return "Signup successful";
     }
 
     // POST /users/login - Authenticate a user (manual authentication for custom login page)

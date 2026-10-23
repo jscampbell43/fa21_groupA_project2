@@ -131,6 +131,15 @@ This file tracks progress and context for Devin sessions working on this project
   - This is a valid architecture for manual auth with Spring Security utilities
   - CSRF is disabled - enable before production
 - Database has uncommitted changes (test users added)
+- **Authentication State Management** (TODO - Fix in future phase)
+  - User ID currently retrieved from `sessionStorage.getItem('user') || '1'` in React components
+  - This is a placeholder and not a proper authentication solution
+  - Needs proper authentication state management with:
+    - React Context or state management library
+    - Secure session/token handling
+    - Proper user identity verification
+    - Protected routes in React
+  - Affects: AddItem.jsx, Wishlist.jsx, and other protected pages
 
 ### API Endpoints
 **Users:**

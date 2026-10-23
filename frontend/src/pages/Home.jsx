@@ -1,19 +1,14 @@
 import { useNavigate } from 'react-router-dom'
-import { userAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation'
 
 function Home() {
   const navigate = useNavigate()
+  const { user, logout } = useAuth()
 
   const handleLogout = async () => {
-    try {
-      await userAPI.logout()
-      navigate('/')
-    } catch (err) {
-      console.error('Logout error:', err)
-      // Even if API fails, navigate to login
-      navigate('/')
-    }
+    await logout()
+    navigate('/')
   }
 
   return (
@@ -31,7 +26,9 @@ function Home() {
         </button>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-semibold mb-4">Welcome to Wishlist!</h2>
+          <h2 className="text-2xl font-semibold mb-4">
+            Welcome, {user?.username || 'User'}!
+          </h2>
           <p className="text-gray-600">
             Use the navigation above to manage your wishlist items.
           </p>

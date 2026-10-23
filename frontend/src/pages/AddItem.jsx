@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { itemAPI, userAPI } from '../services/api'
+import { itemAPI } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation'
 
 function AddItem() {
@@ -13,10 +14,7 @@ function AddItem() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-
-  // For now, we'll use a placeholder user ID
-  // In a real app, this would come from authentication state
-  const userId = sessionStorage.getItem('user') || '1'
+  const { userId, logout } = useAuth()
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -35,15 +33,23 @@ function AddItem() {
     e.preventDefault()
     setSuccess('')
 
+    // Prevent multiple submissions
+    if (loading) {
+      return
+    }
+
     if (!validateForm()) {
       return
     }
+
+    // Fallback to '1' if not logged in (for testing)
+    const finalUserId = userId || '1'
 
     setLoading(true)
 
     try {
       await itemAPI.addItem({
-        id: userId,
+        id: finalUserId,
         name,
         desc: description,
         link,
@@ -66,13 +72,8 @@ function AddItem() {
   }
 
   const handleLogout = async () => {
-    try {
-      await userAPI.logout()
-      navigate('/')
-    } catch (err) {
-      console.error('Logout error:', err)
-      navigate('/')
-    }
+    await logout()
+    navigate('/')
   }
 
   return (
@@ -116,7 +117,6 @@ function AddItem() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter item name"
-                required
               />
             </div>
 
@@ -173,13 +173,12 @@ function AddItem() {
                 value={list}
                 onChange={(e) => setList(e.target.value)}
                 placeholder="Enter list name"
-                required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
               disabled={loading}
             >
               {loading ? 'Adding Item...' : 'Add Item'}
