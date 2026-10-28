@@ -2,6 +2,8 @@ package com.example.Wishlist.Database;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 
@@ -17,9 +19,12 @@ public class UserDB {
     private int user_id;
 
     // Unique username for login
+    @NotBlank(message = "Username cannot be empty")
+    @Size(min = 3, max = 50, message = "Username must be longer than 3 and less than 50 characters")
     private String username;
 
     // User's password (NOTE: should be hashed in production)
+    @NotBlank(message = "Password cannot be empty")
     private String password;
 
     // Role to distinguish between Admin and regular User

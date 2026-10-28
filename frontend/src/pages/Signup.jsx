@@ -48,16 +48,17 @@ function Signup() {
       const result = await signup(username, password, 'USER')
       if (result.success) {
         setSuccess('User successfully added! Redirecting to login...')
+        // Keep button disabled during redirect
         setTimeout(() => {
           navigate('/')
         }, 2000)
       } else {
         setError(result.message || 'Signup failed')
+        setLoading(false)
       }
     } catch (err) {
       setError('Something went wrong, please try again.')
       console.error('Signup error:', err)
-    } finally {
       setLoading(false)
     }
   }

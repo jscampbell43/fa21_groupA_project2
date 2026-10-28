@@ -131,15 +131,91 @@ This file tracks progress and context for Devin sessions working on this project
   - This is a valid architecture for manual auth with Spring Security utilities
   - CSRF is disabled - enable before production
 - Database has uncommitted changes (test users added)
-- **Authentication State Management** (TODO - Fix in future phase)
-  - User ID currently retrieved from `sessionStorage.getItem('user') || '1'` in React components
-  - This is a placeholder and not a proper authentication solution
-  - Needs proper authentication state management with:
-    - React Context or state management library
-    - Secure session/token handling
-    - Proper user identity verification
-    - Protected routes in React
-  - Affects: AddItem.jsx, Wishlist.jsx, and other protected pages
+- **Authentication State Management** (COMPLETED - 2026-10-22)
+  - ✅ Implemented React Context for authentication state management
+  - ✅ AuthContext stores user object with username and userId
+  - ✅ Proper user ID retrieval from backend on login
+  - ✅ Auth state persists across page refreshes via sessionStorage
+  - ⚠️ Still needs: Protected routes in React (route guards)
+  - Affects: All protected pages now use auth context instead of sessionStorage placeholder
+
+### Future Functionality (To Implement After Modernization Complete)
+These features should be added after completing all modernization phases (Phases 1-5).
+
+**1. Edit Account Page Completion**
+- Current: EditAccount.jsx has UI but backend endpoints are not implemented
+- Needed:
+  - Backend endpoint: PUT `/users/update` - Update user username and/or password
+  - Backend endpoint: DELETE `/users/delete` - Delete user account
+  - Frontend: Wire up update and delete buttons to backend endpoints
+  - Frontend: Add proper validation and confirmation dialogs
+- Note: Should be implemented during Phase 2 (Backend API Polish) or after
+
+**2. Complete CRUD Operations for Items**
+- Current: Can add items, but update and delete exist on backend but not fully integrated
+- Needed:
+  - **Update Items:**
+    - Frontend: Edit button on each item in Wishlist.jsx
+    - Frontend: Pre-fill AddItem form with existing item data
+    - Frontend: Or create dedicated EditItem component
+    - Backend: Ensure PUT `/items/updateItem` works correctly
+  - **Update List Names:**
+    - Frontend: Ability to rename list names
+    - Backend: Endpoint to update list_name for multiple items at once
+  - **Delete Items:**
+    - Frontend: Delete button on each item in Wishlist.jsx
+    - Frontend: Confirmation dialog before deletion
+    - Backend: Ensure DELETE `/items/deleteItem` works correctly
+  - **Delete Entire Lists:**
+    - Frontend: Delete button on list view
+    - Frontend: Confirmation dialog before deletion
+    - Backend: Endpoint to delete all items with a specific list_name
+- Note: Should be implemented after Phase 2 (Backend API Polish)
+
+**3. Complete CRUD Operations for Users**
+- Current: Skeleton in place but not fully functional
+- Needed:
+  - **Update User:**
+    - Frontend: EditAccount.jsx already has UI
+    - Backend: PUT `/users/update` endpoint
+  - **Delete User:**
+    - Frontend: EditAccount.jsx already has UI
+    - Backend: DELETE `/users/delete` endpoint
+    - Note: Should also delete all associated items when user is deleted
+- Note: Should be implemented during Phase 2 (Backend API Polish)
+
+**Backend Technical Debt (TODO):**
+- **ItemDAO.addItem() Refactoring:**
+  - Current: Uses native SQL INSERT that doesn't return the auto-generated ID
+  - Issue: addItem() in ItemController returns ID=0 as placeholder in ItemResponse
+  - Solution: Refactor ItemDAO to return generated ID using one of:
+    - @Query with RETURNING clause (SQLite-specific)
+    - Use JPA save() method instead of native SQL
+    - Add a separate query to fetch the last inserted ID
+  - Priority: Medium - affects ItemController.addItem() response quality
+
+**4. Admin User Flows**
+- Current: No admin-specific functionality
+- Needed:
+  - **Admin Role System:**
+    - Backend: Use existing role field in UserDB (USER vs ADMIN)
+    - Backend: Role-based access control in controllers
+    - Frontend: Conditional UI based on user role
+  - **Admin User Management:**
+    - Frontend: Admin-only page to view all users
+    - Frontend: List view with update and delete buttons for each user
+    - Backend: Existing GET `/users/allUsers` endpoint (already available)
+    - Backend: Update/delete user endpoints (see item 3 above)
+  - **Admin Item Management:**
+    - Frontend: Admin-only page to view all items
+    - Frontend: List view with update and delete buttons for each item
+    - Backend: Existing GET `/items/allItems` endpoint (already available)
+    - Backend: Update/delete item endpoints (see item 2 above)
+  - **Admin Dashboard:**
+    - Frontend: Dedicated admin dashboard page
+    - Frontend: Links to user management and item management
+    - Frontend: Overview statistics (total users, total items, etc.)
+- Note: Should be implemented after Phase 3 (Full Spring Security) to ensure proper authorization
 
 ### API Endpoints
 **Users:**
@@ -163,6 +239,146 @@ This file tracks progress and context for Devin sessions working on this project
 ---
 
 ## Session History
+
+### Session 2026-10-27 (Phase 2: Backend API Polish - Step 3 Complete)
+- Completed ItemController updates to use DTOs and JSON
+- Fixed compilation errors in ItemController (removed old validation imports)
+- Fixed validation annotations in UserDB and ItemDB entities
+- Created UpdateItemRequest.java DTO for update operations
+  - Added validation annotations (removed @NotBlank from int id)
+  - Added @NotBlank to name and listName
+- Created DeleteItemRequest.java DTO for delete operations
+  - Simple DTO with just id field and @Positive validation
+- Updated ItemController methods:
+  - getItemsByList() - changed to return List<ItemResponse> with HTTP 200
+  - addItem() - changed to use @RequestBody AddItemRequest, returns HTTP 201
+    - Returns ID=0 as placeholder (documented as technical debt)
+    - Fixed DAO parameter order and field mappings
+  - updateItem() - changed to use @RequestBody UpdateItemRequest, returns HTTP 200
+    - Added item existence check (throws ItemNotFoundException)
+    - Reconstructs ItemDB from DTO (sets ID separately due to constructor limitations)
+    - Fixed constructor parameter mismatch and variable naming issues
+  - deleteItem() - changed to use @RequestBody DeleteItemRequest, returns HTTP 200
+    - Added item existence check (throws ItemNotFoundException)
+    - Returns Map<String, String> with success message
+- **ItemController now 100% complete** - all 6 methods updated to use DTOs and JSON
+- Backend Phase 2 Step 3 (REST API Design) backend portion complete
+- Next steps: Update frontend API service and components to use JSON
+
+### Session 2026-10-23 (Phase 2: Backend API Polish - Steps 1, 2, & Partial 3)
+- Started Phase 2: Backend API Polish
+- **Step 1: Bean Validation** - COMPLETED
+  - Added `spring-boot-starter-validation` dependency to pom.xml
+  - Added validation annotations to UserDB entity (@NotBlank on username, password)
+  - Added validation annotations to ItemDB entity (@NotBlank on name, list_name)
+  - Added `@Validated` annotation to UserController class (Spring annotation)
+  - Added `@Validated` annotation to ItemController class
+  - Added `@NotBlank` annotations to UserController signup/login methods
+  - Added `@NotBlank` annotations to ItemController addItem method
+  - Fixed import issue: @Validated is from Spring (org.springframework.validation.annotation.Validated)
+- **Step 2: Global Exception Handler** - COMPLETED
+  - Created GlobalExceptionHandler.java in exceptions package
+  - Implemented handler for ConstraintViolationException (validation errors from @RequestParam)
+  - Implemented handler for MethodArgumentNotValidException (validation errors from @RequestBody - for future use)
+  - Implemented handler for generic Exception
+  - Implemented handler for UserNotFoundException (returns HTTP 404)
+  - Implemented handler for ItemNotFoundException (returns HTTP 404)
+  - Returns structured JSON error responses with status code, message, and errors object
+  - Added "[GlobalExceptionHandler]" prefix to error messages for identification
+  - Returns HTTP 400 Bad Request for validation errors
+  - Returns HTTP 500 Internal Server Error for generic exceptions
+  - Returns HTTP 404 Not Found for custom exceptions
+- Tested validation by temporarily disabling frontend validation
+- Verified GlobalExceptionHandler returns proper JSON error responses
+- Restored frontend validation after testing
+- Backend and frontend validation both working correctly
+- **Step 3: REST API Design** - IN PROGRESS
+  - Added Lombok dependency to pom.xml (version 1.18.30)
+  - Created DTO classes:
+    - UserResponse.java - user response DTO
+    - ItemResponse.java - item response DTO
+    - ErrorResponse.java - error response DTO
+    - SignupRequest.java - signup request DTO with validation
+    - LoginRequest.java - login request DTO with validation
+    - AddItemRequest.java - add item request DTO with validation
+  - Created custom exception classes:
+    - UserNotFoundException.java - thrown when user not found
+    - ItemNotFoundException.java - thrown when item not found
+  - Updated GlobalExceptionHandler with handlers for custom exceptions
+  - Updated UserController:
+    - Changed from @RequestParam to @RequestBody with DTOs
+    - Changed return types to ResponseEntity with DTOs
+    - getAllUsers() - returns List<UserResponse> with HTTP 200
+    - findUserByName() - throws UserNotFoundException, returns UserResponse with HTTP 200
+    - insertNewUser() - uses SignupRequest, returns HTTP 201 on success, HTTP 400 on duplicate
+    - loginUser() - uses LoginRequest, returns HTTP 200 on success, HTTP 401 on invalid password, throws UserNotFoundException
+    - logoutUser() - returns JSON response with HTTP 200
+    - Removed @Validated from class level
+    - Removed @ResponseBody from methods
+  - Partially updated ItemController:
+    - Added imports for DTOs, exceptions, ResponseEntity
+    - Removed @Validated from class level
+    - Removed duplicate imports
+    - Added AddItemRequest, UpdateItemRequest, DeleteItemRequest and ItemNotFoundException imports
+    - getAllItems() - returns List<ItemResponse> with HTTP 200
+    - getitemByUser() - returns List<ItemResponse> with HTTP 200
+    - getItemsByList() - returns List<ItemResponse> with HTTP 200
+    - addItem() - uses @RequestBody AddItemRequest, returns ResponseEntity<ItemResponse> with HTTP 201
+      - Returns ID=0 as placeholder (ItemDAO doesn't return generated ID)
+      - Validation errors handled automatically by @Valid and GlobalExceptionHandler
+    - updateItem() - uses @RequestBody UpdateItemRequest, returns ResponseEntity<ItemResponse> with HTTP 200
+      - Checks if item exists, throws ItemNotFoundException if not found
+      - Reconstructs ItemDB from DTO, sets ID separately
+      - Validation errors handled automatically by @Valid and GlobalExceptionHandler
+    - deleteItem() - uses @RequestBody DeleteItemRequest, returns ResponseEntity<Map<String, String>> with HTTP 200
+      - Checks if item exists, throws ItemNotFoundException if not found
+      - Returns success message in Map
+      - Validation errors handled automatically by @Valid and GlobalExceptionHandler
+  - Backend and frontend still use different data formats (backend now JSON, frontend still form-encoded)
+  - Frontend API service needs to be updated to send JSON instead of form-encoded
+  - Frontend components need to handle JSON error responses
+
+### Session 2026-10-22 (Authentication Context & Testing)
+- Started Phase 2: Backend API Polish
+- **Step 1: Bean Validation**
+  - Added `spring-boot-starter-validation` dependency to pom.xml
+  - Added validation annotations to UserDB entity (@NotBlank on username, password)
+  - Added validation annotations to ItemDB entity (@NotBlank on name, list_name)
+  - Added `@Validated` annotation to UserController class (Spring annotation)
+  - Added `@Validated` annotation to ItemController class
+  - Added `@NotBlank` annotations to UserController signup/login methods
+  - Added `@NotBlank` annotations to ItemController addItem method
+  - Fixed import issue: @Validated is from Spring (org.springframework.validation.annotation.Validated)
+- **Step 2: Global Exception Handler**
+  - Created GlobalExceptionHandler.java in exceptions package
+  - Implemented handler for ConstraintViolationException (validation errors from @RequestParam)
+  - Implemented handler for MethodArgumentNotValidException (validation errors from @RequestBody - for future use)
+  - Implemented handler for generic Exception
+  - Returns structured JSON error responses with status code, message, and errors object
+  - Added "[GlobalExceptionHandler]" prefix to error messages for identification
+  - Returns HTTP 400 Bad Request for validation errors
+  - Returns HTTP 500 Internal Server Error for generic exceptions
+- Tested validation by temporarily disabling frontend validation
+- Verified GlobalExceptionHandler returns proper JSON error responses
+- Restored frontend validation after testing
+- Backend and frontend validation both working correctly
+
+### Session 2026-10-22 (Authentication Context & Testing)
+- Implemented proper authentication state management using React Context
+- Created AuthContext.jsx with user object storing {username, userId}
+- Updated AuthContext to fetch user details from backend on login to get numeric userId
+- Wrapped entire app with AuthProvider in App.jsx
+- Updated Login.jsx to use auth context login function
+- Updated Signup.jsx to use auth context signup function
+- Updated Home.jsx to display username from auth context
+- Updated AddItem.jsx to use userId from auth context
+- Updated Wishlist.jsx to use userId from auth context
+- Fixed Wishlist.jsx to wait for auth context loading before fetching items
+- Fixed loading states in Signup.jsx to keep button disabled during redirect
+- Removed manual sessionStorage handling from components (now managed by auth context)
+- Tested all authentication flows: signup, login, home, wishlist, add item
+- Verified user-specific data loading (items for correct user)
+- Documented future functionality requirements (Edit Account, CRUD operations, Admin flows)
 
 ### Session 2026-10-21 (Frontend Migration to React)
 - Created React frontend with Vite build system in `frontend/` directory
@@ -391,7 +607,7 @@ The application needs modernization to align with current best practices. The ba
 
 ### Recommended Phased Approach
 
-#### Phase 1: Frontend Framework Migration ✅ COMPLETED (2026-10-21)
+#### Phase 1: Frontend Framework Migration ✅ COMPLETED (2026-10-21 & 2026-10-22)
 1. ✅ Set up React with Vite
 2. ✅ Create basic components for login, signup, home, wishlist
 3. ✅ Integrate with existing backend API
@@ -400,11 +616,47 @@ The application needs modernization to align with current best practices. The ba
    - Tailwind CSS configured and working
    - API service with form-encoded data working
    - Client-side routing with React Router working
+5. ✅ **Bonus:** Implemented authentication context with proper user state management
+   - AuthContext stores user object with username and userId
+   - All components use auth context instead of sessionStorage placeholders
+   - User-specific data loading verified
 
-#### Phase 2: Backend API Polish
-1. Implement proper REST API design
-2. Add Bean Validation
-3. Add global exception handler
+#### Phase 2: Backend API Polish (IN PROGRESS - 2026-10-27)
+1. ✅ Add Bean Validation
+   - Added validation dependency to pom.xml
+   - Added validation annotations to UserDB and ItemDB entities
+   - Added @Validated to UserController and ItemController
+   - Added @NotBlank annotations to request parameters
+2. ✅ Add global exception handler
+   - Created GlobalExceptionHandler.java in exceptions package
+   - Handles ConstraintViolationException for @RequestParam validation
+   - Handles MethodArgumentNotValidException for @RequestBody validation (future use)
+   - Handles generic Exception
+   - Handles UserNotFoundException (returns HTTP 404)
+   - Handles ItemNotFoundException (returns HTTP 404)
+   - Returns structured JSON error responses with status, message, and errors
+   - Added "[GlobalExceptionHandler]" prefix for identification
+3. ⏳ Implement proper REST API design (IN PROGRESS - Backend Complete, Frontend Pending)
+   - ✅ Added Lombok dependency to pom.xml
+   - ✅ Created DTOs: UserResponse, ItemResponse, ErrorResponse, SignupRequest, LoginRequest, AddItemRequest, UpdateItemRequest, DeleteItemRequest
+   - ✅ Created custom exceptions: UserNotFoundException, ItemNotFoundException
+   - ✅ Updated GlobalExceptionHandler with custom exception handlers
+   - ✅ Updated UserController to use DTOs and JSON (all methods complete)
+   - ✅ Updated ItemController to use DTOs and JSON (all 6 methods complete):
+     - getAllItems() - returns List<ItemResponse> with HTTP 200
+     - getitemByUser() - returns List<ItemResponse> with HTTP 200
+     - getItemsByList() - returns List<ItemResponse> with HTTP 200
+     - addItem() - uses AddItemRequest, returns HTTP 201
+     - updateItem() - uses UpdateItemRequest, returns HTTP 200
+     - deleteItem() - uses DeleteItemRequest, returns HTTP 200
+   - ⏳ **FRONTEND UPDATES (pending):**
+     - Update frontend API service to send JSON instead of form-encoded
+     - Remove toFormData() helper function
+     - Update Signup.jsx to handle JSON responses
+     - Update Login.jsx to handle JSON responses
+     - Update AddItem.jsx to handle JSON responses
+     - Update Wishlist.jsx to handle JSON responses
+     - Handle errors object from GlobalExceptionHandler
 4. Add OpenAPI/Swagger documentation
 
 #### Phase 3: Full Spring Security
@@ -426,3 +678,56 @@ The application needs modernization to align with current best practices. The ba
 ### Technology Recommendations
 **Frontend Stack:** React + Vite + TypeScript + Tailwind CSS + React Router + Axios
 **Backend Stack:** Keep Spring Boot (already modern), add SpringDoc OpenAPI, Bean Validation, Flyway migrations, proper logging
+
+---
+
+## 🎯 NEXT STEPS (Priority Order)
+
+### Immediate - Complete Phase 2 Frontend Updates
+1. **Update Frontend API Service** (`frontend/src/services/api.js`)
+   - Remove `toFormData()` helper function
+   - Remove `Content-Type: application/x-www-form-urlencoded` headers
+   - Change all API calls to send JSON objects directly
+   - Update methods: signup, login, addItem, updateItem, deleteItem, getItemByUser, getItemByList
+
+2. **Update Frontend Components to Handle JSON Responses**
+   - **Signup.jsx** - Parse JSON error responses from GlobalExceptionHandler
+   - **Login.jsx** - Parse JSON error responses from GlobalExceptionHandler
+   - **AddItem.jsx** - Parse JSON error responses from GlobalExceptionHandler
+   - **Wishlist.jsx** - Handle JSON responses and errors object
+   - Handle both successful responses and validation errors
+
+3. **Test Complete Flow**
+   - Test signup → login → add item → view items → update item → delete item
+   - Verify frontend and backend are using JSON consistently
+   - Verify validation errors display correctly
+
+### After Phase 2 Complete
+4. **Step 4: Add OpenAPI/Swagger Documentation**
+   - Add SpringDoc OpenAPI dependency to pom.xml
+   - Configure Swagger UI
+   - Add API descriptions to controllers
+   - Document request/response models
+   - Test Swagger UI at `/swagger-ui.html`
+
+### Phase 3: Full Spring Security
+5. Re-enable full Spring Security
+6. Implement proper form login with CSRF
+7. Add proper session management
+8. Decide: Thymeleaf or keep SPA approach
+
+### Phase 4: Testing & Quality
+9. Add unit tests for controllers
+10. Add integration tests
+11. Add API tests
+
+### Phase 5: DevOps
+12. Add Docker configuration
+13. Set up CI/CD pipeline
+14. Add monitoring
+
+### Future Functionality (After Modernization Complete)
+15. **Edit Account Page** - Backend endpoints for update/delete user
+16. **Complete CRUD for Items** - Update/delete operations in frontend
+17. **Complete CRUD for Users** - Update/delete operations in frontend
+18. **Admin User Flows** - Role-based access control and admin dashboard

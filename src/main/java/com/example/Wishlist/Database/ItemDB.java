@@ -2,6 +2,7 @@ package com.example.Wishlist.Database;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 // JPA Entity representing a wishlist item in the ITEMS table
 @Table(name="ITEMS")
@@ -17,6 +18,7 @@ public class ItemDB {
     private int user_id;
 
     // Name/title of the wishlist item
+    @NotBlank(message = "Item name must not be empty")
     private String name;
 
     // Detailed description of the item
@@ -29,6 +31,7 @@ public class ItemDB {
     private String img_url;
 
     // Name of the wishlist list this item belongs to (for organization)
+    @NotBlank(message = "List name must not be empty")
     private String list_name;
 
 

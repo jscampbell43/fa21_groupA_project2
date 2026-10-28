@@ -10,12 +10,15 @@ function Wishlist() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
-  const { userId, logout } = useAuth()
+  const { userId, logout, loading: authLoading } = useAuth()
   const finalUserId = userId || '1'
 
   useEffect(() => {
-    loadItems()
-  }, [])
+    // Only load items when auth context is done loading
+    if (!authLoading) {
+      loadItems()
+    }
+  }, [userId, authLoading])
 
   const loadItems = async () => {
     setLoading(true)

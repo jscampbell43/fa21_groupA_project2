@@ -23,12 +23,23 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
+import jakarta.validation.constraints.NotBlank;
+
+import com.example.Wishlist.dto.UserResponse;
+import com.example.Wishlist.dto.SignupRequest;
+import com.example.Wishlist.dto.LoginRequest;
+import com.example.Wishlist.exceptions.UserNotFoundException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 
 // REST Controller for handling user-related HTTP requests
 // Base path: /users
 @RestController
 @RequestMapping(value = "/users")
-
 public class UserController {
 
     @Autowired
@@ -42,7 +53,13 @@ public class UserController {
 
     // GET /users/allUsers - Retrieve all users in the database
     @GetMapping(value = "/allUsers")
-    public List<UserDB> getAllUsers(){return userDAO.findAll();}
+    public ResponseEntity<List<UserResponse>> getAllUsers(){
+        List<UserDB> users = userDAO.findAll();
+        List<UserResponse> userResponses = users.stream()
+            .map(u -> new UserResponse(u.getUser_id(), u.getUsername(), u.getRole()))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(userResponses);
+    }
 
 
    /* Commented out method to get user's saved items
@@ -60,64 +77,72 @@ public class UserController {
 
     // GET /users/{username} - Find a user by username (used for login)
     @GetMapping(value = "/{username}")
-    public UserDB findUserByName(@PathVariable String username){
-        return userDAO.findUserByName(username);
+    public ResponseEntity<UserResponse> findUserByName(@PathVariable String username){
+        UserDB user = userDAO.findUserByName(username);
+        if (user == null) {
+            throw new UserNotFoundException(username);
+        }
+        UserResponse userResponse = new UserResponse(user.getUser_id(), user.getUsername(), user.getRole());
+        return ResponseEntity.ok(userResponse);
     }
 
     // POST /users/signup - Register a new user account
     // Parameters: username, password
     @PostMapping(value = "/signup")
-     @ResponseBody
-     public String insertNewUser(
-        @RequestParam String username,
-        @RequestParam String password,
-        @RequestParam String role
-        ){
+    public ResponseEntity<UserResponse> insertNewUser(
+        @Valid
+        @RequestBody SignupRequest request
+    ){
         // Check if username already exists
-        UserDB existingUser = userDAO.findUserByName(username);
+        UserDB existingUser = userDAO.findUserByName(request.getUsername());
         if (existingUser != null) {
-            return "Username already exists";
+            return ResponseEntity.badRequest().build();
         }
 
         // Hash password before storing
-        String hashedPassword = passwordEncoder.encode(password);
-        String userRole = (role == null || role.isEmpty() ? "USER" : role);
-        userDAO.insertUser(username, hashedPassword, userRole);
-        return "Signup successful";
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        String userRole = (request.getRole() == null || request.getRole().isEmpty() ? "USER" : request.getRole());
+        userDAO.insertUser(request.getUsername(), hashedPassword, userRole);
+        
+        // Fetch the created user to return in response
+        UserDB createdUser = userDAO.findUserByName(request.getUsername());
+        UserResponse userResponse = new UserResponse(createdUser.getUser_id(), createdUser.getUsername(), createdUser.getRole());
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
     // POST /users/login - Authenticate a user (manual authentication for custom login page)
     // Parameters: username, password
     @PostMapping(value = "/login")
-    @ResponseBody
-    public String loginUser(
-        @RequestParam String username,
-        @RequestParam String password
-        ){
-        UserDB user = userDAO.findUserByName(username);
+    public ResponseEntity<UserResponse> loginUser(
+        @Valid
+        @RequestBody LoginRequest request
+    ){
+        UserDB user = userDAO.findUserByName(request.getUsername());
         if (user == null) {
-            return "User not found";
+            throw new UserNotFoundException(request.getUsername());
         }
-        if (passwordEncoder.matches(password, user.getPassword())) {
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             // Create authentication token
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                username,
+                request.getUsername(),
                 null,
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            return "Login successful";
+            UserResponse userResponse = new UserResponse(user.getUser_id(), user.getUsername(), user.getRole());
+            return ResponseEntity.ok(userResponse);
         } else {
-            return "Invalid password";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     // GET /logout - Manual logout handler
     @GetMapping(value = "/logout")
-    @ResponseBody
-    public String logoutUser() {
+    public ResponseEntity<Map<String, String>> logoutUser() {
         SecurityContextHolder.clearContext();
-        return "Logout successful";
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Logout successful");
+        return ResponseEntity.ok(response);
     }
 
 }
