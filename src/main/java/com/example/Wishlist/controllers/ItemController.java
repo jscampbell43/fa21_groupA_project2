@@ -160,7 +160,7 @@ public class ItemController {
             item.getUser_id()
         );
         // Return Response
-        return ResponseEntity.ok(itemResponse)  
+        return ResponseEntity.ok(itemResponse);  
     }
     
     // DELETE /items/deleteItem - Delete an item from the database

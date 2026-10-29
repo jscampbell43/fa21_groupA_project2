@@ -55,6 +55,11 @@ public class ItemDB {
         return id;
     }
 
+    // Setter for item ID (needed for update operations)
+    public void setId(int id) {
+        this.id = id;
+    }
+
     // Getter for user ID (owner of the item)
     public int getUser_id() {
         return user_id;
