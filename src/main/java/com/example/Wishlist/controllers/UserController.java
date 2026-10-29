@@ -32,6 +32,8 @@ import com.example.Wishlist.dto.UserResponse;
 import com.example.Wishlist.dto.SignupRequest;
 import com.example.Wishlist.dto.LoginRequest;
 import com.example.Wishlist.exceptions.UserNotFoundException;
+import com.example.Wishlist.exceptions.DuplicateUsernameException;
+import com.example.Wishlist.exceptions.PasswordNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
@@ -96,7 +98,7 @@ public class UserController {
         // Check if username already exists
         UserDB existingUser = userDAO.findUserByName(request.getUsername());
         if (existingUser != null) {
-            return ResponseEntity.badRequest().build();
+            throw new DuplicateUsernameException(request.getUsername());
         }
 
         // Hash password before storing
@@ -117,9 +119,14 @@ public class UserController {
         @Valid
         @RequestBody LoginRequest request
     ){
+        // If Username is not in database throw UserNotFoundException
         UserDB user = userDAO.findUserByName(request.getUsername());
         if (user == null) {
             throw new UserNotFoundException(request.getUsername());
+        }
+        // If Password does not match throw PassWordNotFoundException
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new PasswordNotFoundException(request.getUsername());
         }
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             // Create authentication token

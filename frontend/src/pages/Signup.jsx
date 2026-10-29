@@ -16,15 +16,15 @@ function Signup() {
 
   const validateForm = () => {
     if (!username.trim()) {
-      setError('Username is required')
+      setError('Username is required!')
       return false
     }
     if (!password) {
-      setError('Password is required')
+      setError('Password is required!')
       return false
     }
     if (password !== passwordAgain) {
-      setError('Passwords must match')
+      setError('Passwords must match!')
       return false
     }
     setError('')
@@ -47,33 +47,32 @@ function Signup() {
     setLoading(true)
 
     try {
-      const response = await signup(username, password, 'USER')
-      
-      // Handle validation errors from GlobalExceptionHandler
-      if (response.data.errors) {
-        const firstError = Object.values(response.data.errors)[0]
-        setError(firstError)
-        setLoading(false)
-        return
-      }
-      
-      // Handle general errors from GlobalExceptionHandler
-      if (response.data.message) {
-        if (response.data.message.includes('already exists')) {
-          setError('Username already exists. Please choose a different username.')
+      const result = await signup(username, password, 'USER')
+
+      if (result.success) {
+        // Success - Backend returns UserResponse object
+        setSuccess('User successfully added! Redirecting to login...')
+        // Keep button disabled during redirect
+        setTimeout(() => {
+          navigate('/')
+        }, 2000)
+      } else {
+        // Error - Handle the response from AuthContext
+        const response = result.response
+        if (response.data.errors) {
+          const firstError = Object.values(response.data.errors)[0]
+          setError(firstError)
+        } else if (response.data.message) {
+          if (response.data.message.includes('already exists')) {
+            setError('Username already exists. Please choose a different username.')
+          } else {
+            setError(response.data.message)
+          }
         } else {
-          setError(response.data.message)
+          setError('Something went wrong, please try again.')
         }
         setLoading(false)
-        return
       }
-      
-      // Success - Backend returns UserResponse object
-      setSuccess('User successfully added! Redirecting to login...')
-      // Keep button disabled during redirect
-      setTimeout(() => {
-        navigate('/')
-      }, 2000)
     } catch (err) {
       // Handle network errors or unexpected errors
       if (err.response && err.response.data) {

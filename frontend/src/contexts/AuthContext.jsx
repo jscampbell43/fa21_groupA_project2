@@ -31,18 +31,16 @@ export const AuthProvider = ({ children }) => {
   // Login function
   const login = async (username, password) => {
     const response = await userAPI.login(username, password)
-    if (response.data === 'Login successful') {
-      // Fetch user details to get the user ID
-      const userResponse = await userAPI.getUser(username)
-      if (userResponse.data) {
-        const userData = { username, userId: userResponse.data.user_id }
-        setUser(userData)
-        sessionStorage.setItem('user', username)
-        sessionStorage.setItem('userId', userResponse.data.user_id)
-        return { success: true }
-      }
+    // Backend now returns UserResponse object: { userId, username, role }
+    if (response.data.userId) {
+      const userData = { username, userId: response.data.userId }
+      setUser(userData)
+      sessionStorage.setItem('user', username)
+      sessionStorage.setItem('userId', response.data.userId)
+      return { success: true, data: response.data }
     }
-    return { success: false, message: response.data || 'Login failed' }
+    // Error case - return the response so the component can handle it
+    return { success: false, response }
   }
 
   // Logout function
@@ -56,11 +54,13 @@ export const AuthProvider = ({ children }) => {
   // Signup function
   const signup = async (username, password, role) => {
     const response = await userAPI.signup(username, password, role)
-    if (response.data === 'Username already exists') {
-      return { success: false, message: 'Username already exists' }
-    } else {
-      return { success: true, message: 'Signup successful' }
+    // Backend now returns UserResponse object on success: { userId, username, role }
+    // On error, it returns ErrorResponse: { status, message, errors }
+    if (response.data.userId) {
+      return { success: true, data: response.data }
     }
+    // Error case - return the response so the component can handle it
+    return { success: false, response }
   }
 
   const value = {

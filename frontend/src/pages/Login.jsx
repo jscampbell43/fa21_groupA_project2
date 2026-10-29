@@ -41,40 +41,34 @@ function Login() {
     setLoading(true)
 
     try {
-      const response = await login(username, password)
+      const result = await login(username, password)
 
-      // Handle validation errors from GlobalExceptionHandler
-      if (response.data.errors) {
-        const firstError = Object.values(response.data.errors)[0]
-        setError(firstError)
-        setLoading(false)
-        return
-      }
-
-      // Handle general errors from GlobalExceptionHandler
-      if (response.data.message) {
-        if (response.data.message.includes("not found")) {
+      if (result.success) {
+        // Success - AuthContext handles state and sessionStorage
+        setSuccess('User successfully Logged In! Redirecting to Home...')
+        // Keep button disabled during redirect
+        setTimeout(() => {
+          navigate('/home')
+        }, 2000)
+      } else {
+        // Error - Handle the response from AuthContext
+        const response = result.response
+        if (response.data.errors) {
+          const firstError = Object.values(response.data.errors)[0]
+          setError(firstError)
+        } else if (response.data.message) {
+          if (response.data.message.includes("not found")) {
+            setError("Invalid username or password")
+          } else {
+            setError(response.data.message)
+          }
+        } else if (response.status === 401) {
           setError("Invalid username or password")
         } else {
-          setError(response.data.message)
+          setError('Something went wrong, please try again.')
         }
         setLoading(false)
-        return
       }
-
-      // Handle 401 unauthorized errors
-      if (response.status === 401) {
-        setError("Invalid username or password")
-        setLoading(false)
-        return
-      }
-
-      // Success - Backend returns UserResponse object
-      setSuccess('User successfully Logged In! Redirecting to Home...')
-      // Keep button disabled during redirect
-      setTimeout(() => {
-        navigate('/home')
-      }, 2000)
     } catch (err) {
       // Handle network errors or unexpected errors
       if (err.response && err.response.data) {
@@ -87,7 +81,7 @@ function Login() {
           setError('Something went wrong, please try again.')
         }
       } else {
-        setError('Something went wrong, please try again.')
+        setError('Something went wrong, please try again!')
       }
       console.error('Login error:', err)
       setLoading(false)

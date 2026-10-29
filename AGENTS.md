@@ -138,6 +138,12 @@ This file tracks progress and context for Devin sessions working on this project
   - ✅ Auth state persists across page refreshes via sessionStorage
   - ⚠️ Still needs: Protected routes in React (route guards)
   - Affects: All protected pages now use auth context instead of sessionStorage placeholder
+- **Password Matching Validation** (FRONTEND-ONLY - 2026-10-29)
+  - ✅ Password matching validation is implemented in Signup.jsx (client-side)
+  - ⚠️ Backend does NOT validate password matching (UX concern, not security)
+  - Note: Backend validation prevents empty passwords and duplicates
+  - Future enhancement: Add `passwordAgain` field to SignupRequest DTO and manual validation in UserController
+  - Priority: Low - Frontend validation is sufficient for current scope
 
 ### Future Functionality (To Implement After Modernization Complete)
 These features should be added after completing all modernization phases (Phases 1-5).
@@ -337,6 +343,59 @@ These features should be added after completing all modernization phases (Phases
   - Backend and frontend still use different data formats (backend now JSON, frontend still form-encoded)
   - Frontend API service needs to be updated to send JSON instead of form-encoded
   - Frontend components need to handle JSON error responses
+
+### Session 2026-10-29 (Phase 2 Frontend Migration & Additional Error Handling)
+- **Phase 2 Frontend Migration - COMPLETED**
+  - Updated frontend/src/services/api.js to send JSON instead of form-encoded
+  - Removed toFormData() helper function
+  - Removed Content-Type headers (Axios handles automatically)
+  - Updated AuthContext.jsx to handle JSON responses from backend
+    - login() now checks for response.data.userId instead of plain text
+    - signup() now checks for response.data.userId instead of plain text
+    - Both functions return { success: true, data: response.data } on success
+    - Both functions return { success: false, response } on error
+  - Updated Signup.jsx to handle JSON error responses
+    - Checks result.success first
+    - On error: parses response.data.errors and response.data.message
+    - Handles duplicate username errors from GlobalExceptionHandler
+  - Updated Login.jsx to handle JSON error responses
+    - Checks result.success first
+    - On error: parses response.data.errors and response.data.message
+    - Handles 401 status for invalid password
+    - Added success state and message display
+  - Updated AddItem.jsx to handle JSON error responses
+    - Fixed field names: userId, description, listName (was id, desc, list)
+    - Added defensive response validation
+    - On error: parses response.data.errors and response.data.message
+  - Updated Wishlist.jsx to handle JSON error responses
+    - Fixed field names: link, image, listName (was item_link, img_url, list_name)
+    - Updated loadItems() error handling
+    - Updated handleSearch() error handling
+    - Removed fallback user ID (now requires proper auth)
+  - Added setId() method to ItemDB.java (needed for updateItem operations)
+  - All frontend components now properly handle JSON responses from GlobalExceptionHandler
+
+- **Additional Error Handling Improvements**
+  - Created DuplicateUsernameException.java for duplicate username errors
+  - Created PasswordNotFoundException.java for invalid password errors
+  - Updated GlobalExceptionHandler.java with handlers for new exceptions
+    - handleDuplicateUsernameException() - returns HTTP 400 with specific error message
+    - handlePasswordNotFoundException() - returns HTTP 401 with specific error message
+  - Updated UserController.java to throw DuplicateUsernameException for duplicate usernames
+  - Updated UserController.java to throw PasswordNotFoundException for invalid passwords
+  - Added password verification using passwordEncoder.matches() in login method
+  - Removed "[GlobalExceptionHandler]" prefix from UserNotFoundException handler (cleaner messages)
+  - Fixed semicolon issue in ItemController.java
+  - Backend compilation successful after all changes
+
+- **Testing**
+  - Tested complete signup flow with backend validation errors
+  - Tested duplicate username error (now returns specific message)
+  - Tested login flow with invalid password (now returns 401 status)
+  - Tested add item flow with JSON requests
+  - Tested wishlist loading with correct field names
+  - Verified sessionStorage contains user and userId after login
+  - All Phase 2 tests passing
 
 ### Session 2026-10-22 (Authentication Context & Testing)
 - Started Phase 2: Backend API Polish

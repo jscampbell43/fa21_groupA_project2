@@ -58,9 +58,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
         Map<String, Object> response = new HashMap<>();
         response.put("status", HttpStatus.NOT_FOUND.value());
-        response.put("message", "[GlobalExceptionHandler] " + ex.getMessage());
+        response.put("message", ex.getMessage());
     
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // Handle for custom Duplicate User exceptions thrown manually
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateUsernameException(DuplicateUsernameException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("message", "[GlobalExceptionHandler] " + ex.getMessage());
+        response.put("errors", Map.of("username", "Username already exists. Please choose a different username."));
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // Handle for custom Password not found exceptions thrown manually
+    @ExceptionHandler(PasswordNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handlePasswordNotFoundException(PasswordNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.UNAUTHORIZED.value());
+        response.put("message", ex.getMessage());
+        response.put("errors", Map.of("password", "Invalid password"));
+    
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
     // Handle for custom Item not found exceptions thrown manually

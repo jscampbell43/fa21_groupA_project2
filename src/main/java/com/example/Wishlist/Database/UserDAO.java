@@ -21,6 +21,10 @@ public interface UserDAO extends JpaRepository<UserDB, Long> {
     @Query("SELECT u FROM UserDB u WHERE u.username = ?1")
     UserDB findUserByName(String username);
 
+    // Find a password by their username (used for login validation)
+    @Query("SELECT u FROM UserDB u WHERE u.username = ?1")
+    UserDB findPasswordByUser(String username);
+
     // Insert a new user into the database using native SQL
     // @Modifying indicates this query modifies data (not just reads)
     // @Transactional ensures the operation is atomic
