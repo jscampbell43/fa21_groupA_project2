@@ -11,7 +11,7 @@ function Wishlist() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const { userId, logout, loading: authLoading } = useAuth()
-  const finalUserId = userId || '1'
+  const finalUserId = userId
 
   useEffect(() => {
     // Only load items when auth context is done loading
@@ -27,8 +27,20 @@ function Wishlist() {
       const response = await itemAPI.getItemByUser(finalUserId)
       setItems(response.data)
     } catch (err) {
-      setError('Failed to load items')
-      console.error('Error loading items:', err)
+      // Handle validation errors from GlobalExceptionHandler
+      if (err.response && err.response.data) {
+        if (err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          setError(firstError)
+        } else if (err.response.data.message) {
+          setError(err.response.data.message)
+        } else {
+          setError('Failed to load items')
+        }
+      } else {
+        setError('Failed to load items')
+    }
+    console.error('Error loading items:', err)
     } finally {
       setLoading(false)
     }
@@ -46,7 +58,18 @@ function Wishlist() {
       const response = await itemAPI.getItemByList(searchTerm, finalUserId)
       setItems(response.data)
     } catch (err) {
-      setError('Failed to search items')
+      if(err.response && err.response.data){
+        if(err.response.data.errors){
+          const firstError = Object.values(err.response.data.errors)[0]
+          setError(firstError)
+        } else if (err.response.data.message){
+          setError(err.response.data.message)
+        } else {
+          setError('Failed to search items')
+        }
+      } else {
+        setError('Failed to search items')
+      }
       console.error('Error searching items:', err)
     } finally {
       setLoading(false)
@@ -114,28 +137,28 @@ function Wishlist() {
               <div key={item.id} className="bg-white rounded-lg shadow-md p-6">
                 <p className="text-sm text-gray-500 mb-2">Item ID: {item.id}</p>
                 <h3 className="text-xl font-semibold mb-2">{item.name}</h3>
-                {item.item_link && (
+                {item.link && (
                   <p className="mb-2">
                     Link:{' '}
                     <a
-                      href={item.item_link}
+                      href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-500 hover:text-blue-700"
                     >
-                      {item.item_link}
+                      {item.link}
                     </a>
                   </p>
                 )}
-                {item.img_url && (
+                {item.image && (
                   <img
-                    src={item.img_url}
+                    src={item.image}
                     alt={item.name}
                     className="max-w-full h-auto mb-2 rounded"
                   />
                 )}
                 <p className="text-gray-600 mb-2">{item.description}</p>
-                <p className="text-sm text-gray-500">List: {item.list_name}</p>
+                <p className="text-sm text-gray-500">List: {item.listName}</p>
               </div>
             ))}
           </div>

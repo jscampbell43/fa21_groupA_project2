@@ -45,19 +45,47 @@ function Signup() {
     setLoading(true)
 
     try {
-      const result = await signup(username, password, 'USER')
-      if (result.success) {
-        setSuccess('User successfully added! Redirecting to login...')
-        // Keep button disabled during redirect
-        setTimeout(() => {
-          navigate('/')
-        }, 2000)
-      } else {
-        setError(result.message || 'Signup failed')
+      const response = await signup(username, password, 'USER')
+      
+      // Handle validation errors from GlobalExceptionHandler
+      if (response.data.errors) {
+        const firstError = Object.values(response.data.errors)[0]
+        setError(firstError)
         setLoading(false)
+        return
       }
+      
+      // Handle general errors from GlobalExceptionHandler
+      if (response.data.message) {
+        if (response.data.message.includes('already exists')) {
+          setError('Username already exists. Please choose a different username.')
+        } else {
+          setError(response.data.message)
+        }
+        setLoading(false)
+        return
+      }
+      
+      // Success - Backend returns UserResponse object
+      setSuccess('User successfully added! Redirecting to login...')
+      // Keep button disabled during redirect
+      setTimeout(() => {
+        navigate('/')
+      }, 2000)
     } catch (err) {
-      setError('Something went wrong, please try again.')
+      // Handle network errors or unexpected errors
+      if (err.response && err.response.data) {
+        if (err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          setError(firstError)
+        } else if (err.response.data.message) {
+          setError(err.response.data.message)
+        } else {
+          setError('Something went wrong, please try again.')
+        }
+      } else {
+        setError('Something went wrong, please try again.')
+      }
       console.error('Signup error:', err)
       setLoading(false)
     }

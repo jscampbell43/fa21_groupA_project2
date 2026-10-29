@@ -6,6 +6,7 @@ function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuth()
@@ -26,6 +27,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
 
     // Prevent multiple submissions
     if (loading) {
@@ -39,16 +41,55 @@ function Login() {
     setLoading(true)
 
     try {
-      const result = await login(username, password)
-      if (result.success) {
-        navigate('/home')
-      } else {
-        setError(result.message || 'Login failed')
+      const response = await login(username, password)
+
+      // Handle validation errors from GlobalExceptionHandler
+      if (response.data.errors) {
+        const firstError = Object.values(response.data.errors)[0]
+        setError(firstError)
+        setLoading(false)
+        return
       }
+
+      // Handle general errors from GlobalExceptionHandler
+      if (response.data.message) {
+        if (response.data.message.includes("not found")) {
+          setError("Invalid username or password")
+        } else {
+          setError(response.data.message)
+        }
+        setLoading(false)
+        return
+      }
+
+      // Handle 401 unauthorized errors
+      if (response.status === 401) {
+        setError("Invalid username or password")
+        setLoading(false)
+        return
+      }
+
+      // Success - Backend returns UserResponse object
+      setSuccess('User successfully Logged In! Redirecting to Home...')
+      // Keep button disabled during redirect
+      setTimeout(() => {
+        navigate('/home')
+      }, 2000)
     } catch (err) {
-      setError('Login failed. Please check your credentials.')
+      // Handle network errors or unexpected errors
+      if (err.response && err.response.data) {
+        if (err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          setError(firstError)
+        } else if (err.response.data.message) {
+          setError(err.response.data.message)
+        } else {
+          setError('Something went wrong, please try again.')
+        }
+      } else {
+        setError('Something went wrong, please try again.')
+      }
       console.error('Login error:', err)
-    } finally {
       setLoading(false)
     }
   }
@@ -61,6 +102,12 @@ function Login() {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {success}
           </div>
         )}
 

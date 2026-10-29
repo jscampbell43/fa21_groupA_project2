@@ -48,14 +48,22 @@ function AddItem() {
     setLoading(true)
 
     try {
-      await itemAPI.addItem({
-        id: finalUserId,
+      const response = await itemAPI.addItem({
+        userId: finalUserId,   // ✅ Matches AddItemRequest.userId
         name,
-        desc: description,
+        description,           // ✅ Matches AddItemRequest.description
         link,
         image,
-        list,
+        listName: list,        // ✅ Matches AddItemRequest.listName
       })
+      // Check if response has errors (shouldn't happen if HTTP 201, but defensive)
+      if (response.data.errors) {
+        const firstError = Object.values(response.data.errors)[0]
+        setError(firstError)
+        setLoading(false)
+        return
+      }
+
       setSuccess('Item successfully added!')
       // Clear form
       setName('')
@@ -64,7 +72,19 @@ function AddItem() {
       setImage('')
       setList('')
     } catch (err) {
-      setError('Something went wrong, please try again')
+      // Handle validation errors from GlobalExceptionHandler
+      if (err.response && err.response.data) {
+        if (err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          setError(firstError)
+        } else if (err.response.data.message) {
+          setError(err.response.data.message)
+        } else {
+          setError('Something went wrong, please try again')
+        }
+      } else {
+        setError('Something went wrong, please try again')
+      }
       console.error('Error adding item:', err)
     } finally {
       setLoading(false)

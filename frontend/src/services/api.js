@@ -5,30 +5,14 @@ const api = axios.create({
   baseURL: '', // Will be proxied to http://localhost:8080 during development
 })
 
-// Helper function to convert object to URL-encoded form data
-const toFormData = (data) => {
-  const formData = new URLSearchParams()
-  Object.keys(data).forEach(key => {
-    formData.append(key, data[key])
-  })
-  return formData
-}
 
 // User API calls
 export const userAPI = {
   login: (username, password) =>
-    api.post('/users/login', toFormData({ username, password }), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }),
+    api.post('/users/login', { username, password }),
 
   signup: (username, password, role) =>
-    api.post('/users/signup', toFormData({ username, password, role }), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }),
+    api.post('/users/signup', { username, password, role }),
 
   logout: () =>
     api.get('/users/logout'),
@@ -54,22 +38,14 @@ export const itemAPI = {
   searchItem: (itemName) =>
     api.get(`/items/itemSearch/${itemName}`),
 
-  addItem: (itemData) =>
-    api.post('/items/additem', toFormData(itemData), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }),
+  addItem: (item) =>
+    api.post('/items/additem', item),
 
-  updateItem: (itemData) =>
-    api.put('/items/updateItem', toFormData(itemData), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }),
+  updateItem: (item) =>
+    api.put('/items/updateItem', item),
 
-  deleteItem: (itemId) =>
-    api.delete('/items/deleteItem', { data: toFormData({ id: itemId }) }),
+  deleteItem: (item) =>
+    api.delete('/items/deleteItem', item),
 }
 
 export default api
