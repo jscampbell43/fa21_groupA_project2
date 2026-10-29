@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+
+
 function Signup() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
