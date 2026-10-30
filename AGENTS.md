@@ -397,6 +397,31 @@ These features should be added after completing all modernization phases (Phases
   - Verified sessionStorage contains user and userId after login
   - All Phase 2 tests passing
 
+### Session 2026-10-29 (Swagger/OpenAPI Documentation)
+- **Phase 2 Step 4: Add OpenAPI/Swagger Documentation - COMPLETED**
+  - Added SpringDoc OpenAPI dependency to pom.xml (version 2.3.0)
+  - Added Swagger configuration to application.properties
+    - Swagger UI path: /swagger-ui.html
+    - API docs path: /api-docs
+    - Custom API info (title, description, version, contact)
+  - Backend restarted successfully with Swagger enabled
+  - Swagger UI accessible at http://localhost:8080/swagger-ui.html
+  - All API endpoints automatically documented
+  - Request/response models (DTOs) automatically documented
+  - Interactive testing interface available
+  - No code changes needed to controllers or DTOs for basic documentation
+
+- **Future Swagger Enhancements (Optional)**
+  - Add @Tag annotations to controllers for better organization
+  - Add @Operation annotations to endpoints for detailed descriptions
+  - Add @Schema annotations to DTOs for field descriptions
+  - Add @Parameter annotations for parameter descriptions
+  - Add @ApiResponse annotations for response documentation
+  - Add example request/response examples
+  - Add API security documentation (when Spring Security is re-enabled)
+  - Add grouping and sorting of endpoints
+  - Add external documentation links
+
 ### Session 2026-10-22 (Authentication Context & Testing)
 - Started Phase 2: Backend API Polish
 - **Step 1: Bean Validation**
