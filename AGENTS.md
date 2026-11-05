@@ -514,6 +514,101 @@ These features should be added after completing all modernization phases (Phases
 - Tested and verified login successfully authenticates and redirects to homeUser.html
 - Updated AGENTS.md with session progress
 
+### Session 2026-11-04 (Future Functionality - Edit Account Page - COMPLETE)
+- **Edit Account Page - Update User - COMPLETE**
+  - Created CorsConfig.java to allow cross-origin requests from frontend
+    - Allows requests from http://localhost:5173 and http://localhost:5174
+    - Required because frontend and backend run on different ports
+    - Configured to allow all headers and methods
+  - Created UpdateUserRequest.java DTO
+    - Added fields: userId, username, password
+    - Added Lombok annotations: @Data, @NoArgsConstructor, @AllArgsConstructor
+    - No validation annotations (allows partial updates)
+  - Implemented UserController.updateUser() method
+    - Uses @PutMapping("/update")
+    - Accepts @Valid @RequestBody UpdateUserRequest
+    - Returns ResponseEntity<UserResponse> with HTTP 200
+    - Fetches user by userId using userDAO.findUserByUserId()
+    - Throws UserNotFoundException if user not found (passes userId for semantic correctness)
+    - Updates username if provided:
+      - Checks if new username already exists (excluding current user)
+      - Throws DuplicateUsernameException if username taken by different user
+      - Updates user object's username
+    - Updates password if provided:
+      - Hashes new password using passwordEncoder
+      - Updates user object's password
+    - Uses JPA save() method to persist changes
+    - Maps updated UserDB to UserResponse
+    - Returns updated user data
+  - Removed @NotBlank annotations from UserDB entity
+    - Removed from username field (allows password-only updates)
+    - Removed from password field (allows username-only updates)
+    - Kept @Size validation for min/max length
+    - This was critical - entity-level @NotBlank prevented partial updates and caused "Could not commit JPA transaction" errors
+  - Added updateUser method to frontend/src/services/api.js
+    - Accepts userId, username, password parameters
+    - Sends PUT request to /users/update with JSON body
+    - Uses Vite proxy (baseURL empty)
+  - Added update function to frontend/src/contexts/AuthContext.jsx
+    - Gets userId from user state
+    - Calls userAPI.updateUser(userId, username, password)
+    - On success: updates user state and sessionStorage (username and userId)
+    - Does NOT store password in sessionStorage (security best practice)
+    - Returns success/error response object
+    - Added update to context value object
+  - Updated frontend/src/pages/EditAccount.jsx
+    - Imported useAuth from AuthContext
+    - Gets user, userId, and update function from auth context
+    - Added useEffect to pre-populate username field with current username
+      - Critical fix: useState alone didn't work because user data loads asynchronously
+      - useEffect syncs local state with context after user data loads
+    - Implemented handleUpdate() with:
+      - Client-side validation (at least one field must have value)
+      - Calls update(username, password) from auth context
+      - Handles success: shows success message, navigates to Home after 2 seconds
+      - Handles error: parses JSON errors from GlobalExceptionHandler
+      - Handles validation errors (username already exists, etc.)
+      - Handles general errors with fallback messages
+      - Proper loading state management
+      - Network error handling in catch block
+
+- **Key Issues Encountered and Resolved:**
+  1. **CORS Error:** Browser blocked requests from frontend (port 5173) to backend (port 8080)
+     - Error: "Access to XMLHttpRequest blocked by CORS policy"
+     - Solution: Created CorsConfig.java to explicitly allow requests from frontend origins
+  2. **JPA Validation Error:** Entity @NotBlank annotations prevented partial updates
+     - Error: "Could not commit JPA transaction" when updating username only (password empty)
+     - Solution: Removed @NotBlank from UserDB username and password fields
+     - Validation now happens at controller level, not entity level
+  3. **Username Field Not Pre-populating:** useState with user?.username didn't work
+     - Problem: AuthContext loads user data asynchronously, component renders before data available
+     - Solution: Added useEffect to sync local state with context after user data loads
+  4. **Wrong Routing Approach:** Initially tried bypassing Vite proxy with direct backend URL
+     - Problem: Didn't solve CORS, broke proxy setup
+     - Solution: Kept Vite proxy (baseURL empty), added CORS configuration to backend
+
+- **Update User Flow - READY FOR TESTING**
+  - Backend: ✅ Complete with CORS enabled
+  - Frontend API: ✅ Complete using Vite proxy
+  - Frontend AuthContext: ✅ Complete with state management
+  - Frontend EditAccount page: ✅ Complete with useEffect for pre-population
+  - Servers: ✅ Backend on port 8080, Frontend on port 5173
+
+- **Testing Checklist:**
+  - Test 1: Update username only (password empty)
+  - Test 2: Update password only (username empty)
+  - Test 3: Update both username and password
+  - Test 4: Partial update - both fields empty (should show validation error)
+  - Test 5: Duplicate username error (username taken by another user)
+  - Test 6: Submit current username unchanged (should succeed, no duplicate error)
+  - Test 7: Nonexistent user ID (should return 404 error)
+  - Test 8: Session storage synchronization (verify username persists after update)
+  - Test 9: Loading state behavior (button disabled during update)
+  - Test 10: Network error handling (stop backend, test error message)
+  - Test 11: Login with new username after update
+  - Test 12: Login with new password after update
+  - Test 13: Verify old password rejected after password change
+
 ### Session 2026-10-14 (Part 1)
 - Created AGENTS.md file to document project state
 - Reviewed git history and codebase structure

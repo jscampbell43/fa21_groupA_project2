@@ -1,15 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { userAPI } from '../services/api'
 import Navigation from '../components/Navigation'
+import { useAuth } from '../contexts/AuthContext'
 
 function EditAccount() {
+  const {user, userId, update} = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user?.username) {
+      setUsername(user.username)
+    }
+  }, [user?.username])
 
   const handleLogout = async () => {
     try {
@@ -23,7 +31,39 @@ function EditAccount() {
 
   const handleUpdate = async () => {
     setError('')
-    setSuccess('Update functionality needs to be implemented in the backend first.')
+    setSuccess('')
+    
+    if (!username.trim() && !password) {
+      setError('Enter Username and/or Password to update')
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const result = await update(username, password)
+      if (result.success) {
+        setSuccess('Account updated successfully!')
+        setTimeout(() => {
+          navigate('/home')
+        }, 2000)
+      } else {
+        const response = result.response
+        if (response.data.errors) {
+          const firstError = Object.values(response.data.errors)[0]
+          setError(firstError)
+        } else if (response.data.message) {
+          setError(response.data.message)
+        } else {
+          setError('Something went wrong, please try again.')
+        }
+        setLoading(false)
+      }
+    } catch (err) {
+      setError('Something went wrong, please try again!')
+      console.error('Update error:', err)
+      setLoading(false)
+    }
   }
 
   const handleDelete = async () => {

@@ -31,6 +31,7 @@ import jakarta.validation.constraints.NotBlank;
 import com.example.Wishlist.dto.UserResponse;
 import com.example.Wishlist.dto.SignupRequest;
 import com.example.Wishlist.dto.LoginRequest;
+import com.example.Wishlist.dto.UpdateUserRequest;
 import com.example.Wishlist.exceptions.UserNotFoundException;
 import com.example.Wishlist.exceptions.DuplicateUsernameException;
 import com.example.Wishlist.exceptions.PasswordNotFoundException;
@@ -150,6 +151,48 @@ public class UserController {
         Map<String, String> response = new HashMap<>();
         response.put("message", "Logout successful");
         return ResponseEntity.ok(response);
+    }
+
+    // PUT /update - Update user account
+    @PutMapping("/update")
+    public ResponseEntity<UserResponse> updateUser(
+        @Valid
+        @RequestBody UpdateUserRequest request) {
+        
+        // Fetch user by userId
+        UserDB user = userDAO.findUserByUserId(request.getUserId());
+        
+        // If user not found, throw exception
+        if (user == null) {
+            throw new UserNotFoundException(String.valueOf(request.getUserId()));
+        }
+        
+        // Update username if provided
+        if (request.getUsername() != null && !request.getUsername().isEmpty()) {
+            // Check if username already exists (excluding current user)
+            UserDB existingUser = userDAO.findUserByName(request.getUsername());
+            if (existingUser != null && existingUser.getUser_id() != request.getUserId()) {
+                throw new DuplicateUsernameException(request.getUsername());
+            }
+            user.setUsername(request.getUsername());
+        }
+        
+        // Update password if provided
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            String hashedPassword = passwordEncoder.encode(request.getPassword());
+            user.setPassword(hashedPassword);
+        }
+        
+        // Save changes
+        UserDB updatedUser = userDAO.save(user);
+        
+        // Map to response and return
+        UserResponse userResponse = new UserResponse(
+            updatedUser.getUser_id(),
+            updatedUser.getUsername(),
+            updatedUser.getRole()
+        );
+        return ResponseEntity.ok(userResponse);
     }
 
 }

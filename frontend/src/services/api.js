@@ -22,6 +22,9 @@ export const userAPI = {
 
   getAllUsers: () =>
     api.get('/users/allUsers'),
+
+  updateUser: (userId, username, password) =>
+    api.put('/users/update', { userId: userId, username: username, password: password }),
 }
 
 // Item API calls
