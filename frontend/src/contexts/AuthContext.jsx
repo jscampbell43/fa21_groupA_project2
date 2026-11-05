@@ -66,14 +66,19 @@ export const AuthProvider = ({ children }) => {
   // Update User function
   const update = async (username, password) => {
     const userId = user.userId
-    const response = await userAPI.updateUser(userId, username, password)
-    if (response.data.userId) {
-      setUser({username: response.data.username, userId: response.data.userId })
-      sessionStorage.setItem('user', response.data.username)
-      sessionStorage.setItem('userId', response.data.userId)
-      return { success: true, data: response.data}
+    try {
+      const response = await userAPI.updateUser(userId, username, password)
+      if (response.data.userId) {
+        setUser({username: response.data.username, userId: response.data.userId })
+        sessionStorage.setItem('user', response.data.username)
+        sessionStorage.setItem('userId', response.data.userId)
+        return { success: true, data: response.data}
+      }
+      return {success: false, response}
+    } catch (err) {
+      // Return the error response so the component can handle it
+      return { success: false, response: err.response }
     }
-    return {success: false, response}
   }
 
   const value = {
