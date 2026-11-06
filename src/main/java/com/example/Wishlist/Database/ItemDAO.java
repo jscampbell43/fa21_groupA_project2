@@ -41,4 +41,12 @@ public interface ItemDAO extends JpaRepository<ItemDB, Long> {
         @Param("link") String link, 
         @Param("url") String url, 
         @Param("list") String list);
+
+    // Delete all items associated with userId, this is to prevent orphanded items during User Delete
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM ITEMS WHERE user_id = :userId", nativeQuery = true)
+    void deleteItemsByUserId(
+        @Param("userId") int userId
+    );
 }

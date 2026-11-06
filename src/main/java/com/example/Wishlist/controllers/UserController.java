@@ -1,8 +1,9 @@
 package com.example.Wishlist.controllers;
 
-import com.example.Wishlist.Database.ItemDB;
 import com.example.Wishlist.Database.UserDAO;
 import com.example.Wishlist.Database.UserDB;
+import com.example.Wishlist.Database.ItemDAO;
+import com.example.Wishlist.Database.ItemDB;
 
 import org.apache.catalina.User;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,7 @@ import com.example.Wishlist.dto.UserResponse;
 import com.example.Wishlist.dto.SignupRequest;
 import com.example.Wishlist.dto.LoginRequest;
 import com.example.Wishlist.dto.UpdateUserRequest;
+import com.example.Wishlist.dto.DeleteUserRequest;
 import com.example.Wishlist.exceptions.UserNotFoundException;
 import com.example.Wishlist.exceptions.DuplicateUsernameException;
 import com.example.Wishlist.exceptions.PasswordNotFoundException;
@@ -45,11 +47,14 @@ import jakarta.validation.Valid;
 @RequestMapping(value = "/users")
 public class UserController {
 
+    private List<UserDB> user;
+    private UserDAO userDAO;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private List<UserDB> user;
-    private UserDAO userDAO;
+    @Autowired
+    private ItemDAO itemDAO;
     
     // Constructor injection of UserDAO for database operations
     public UserController(UserDAO userDAO) { this.userDAO = userDAO; }
@@ -154,7 +159,7 @@ public class UserController {
     }
 
     // PUT /update - Update user account
-    @PutMapping("/update")
+    @PutMapping(value = "/update")
     public ResponseEntity<UserResponse> updateUser(
         @Valid
         @RequestBody UpdateUserRequest request) {
@@ -194,5 +199,35 @@ public class UserController {
         );
         return ResponseEntity.ok(userResponse);
     }
+
+    // DELETE /delete - Delete user account
+    @DeleteMapping(value = "/delete")
+    public ResponseEntity<Map<String, String>> deleteUser(
+        @Valid
+        @RequestBody DeleteUserRequest request) {
+            // Fetch user by userId
+            UserDB user = userDAO.findUserByUserId(request.getUserId());
+
+            // If user not found, throw exception
+            if (user == null) {
+                throw new UserNotFoundException(String.valueOf(request.getUserId()));
+            }
+
+            // Verify password before deletion (security measure)
+            if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+                throw new PasswordNotFoundException(request.getUsername());
+            }
+
+            //Delete users items first to prevent orphaned items
+            itemDAO.deleteItemsByUserId(request.getUserId());
+
+            // If User exists delete user
+            userDAO.delete(user);
+
+            //Return success Response
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Delete successful");
+            return ResponseEntity.ok(response);
+        }
 
 }

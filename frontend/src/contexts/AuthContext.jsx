@@ -81,6 +81,25 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Delete User function
+  const deleteUser = async (username, password) => {
+    const userId = user.userId
+    try{
+      const response = await userAPI.deleteUser(userId, username, password)
+      if(response.status === 200 || response.data.message){
+        setUser(null)
+        sessionStorage.removeItem('user')
+        sessionStorage.removeItem('userId')
+        return { success: true, data: response.data}
+      }
+      return {success: false, response}
+    }
+    catch (err){
+      // Return the error response so the component can handle it
+      return { success: false, response: err.response }
+    }
+  }
+
   const value = {
     user,
     loading,
@@ -88,6 +107,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     signup,
     update,
+    deleteUser,
     isAuthenticated: !!user,
     userId: user?.userId || '1'
   }

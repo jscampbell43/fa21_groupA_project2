@@ -25,6 +25,9 @@ export const userAPI = {
 
   updateUser: (userId, username, password) =>
     api.put('/users/update', { userId: userId, username: username, password: password }),
+
+  deleteUser: (userId, username, password) =>
+    api.delete('/users/delete', {data: {userId: userId, password: password}}),
 }
 
 // Item API calls

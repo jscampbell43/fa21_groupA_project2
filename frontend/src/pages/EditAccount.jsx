@@ -5,7 +5,7 @@ import Navigation from '../components/Navigation'
 import { useAuth } from '../contexts/AuthContext'
 
 function EditAccount() {
-  const {user, userId, update} = useAuth()
+  const {user, userId, update, deleteUser} = useAuth()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -68,7 +68,39 @@ function EditAccount() {
 
   const handleDelete = async () => {
     setError('')
-    setSuccess('Delete functionality needs to be implemented in the backend first.')
+    setSuccess('')
+    
+     // Add confirmation dialog before deleting account
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const result = await deleteUser(username, password)
+      if (result.success) {
+        setSuccess('Account deleted successfully!')
+        setTimeout(() => {
+          navigate('/')
+        }, 2000)
+      } else {
+        const response = result.response
+        if (response.data.errors) {
+          const firstError = Object.values(response.data.errors)[0]
+          setError(firstError)
+        } else if (response.data.message) {
+          setError(response.data.message)
+        } else {
+          setError('Something went wrong, please try again.')
+        }
+        setLoading(false)
+      }
+    } catch (err) {
+      setError('Something went wrong, please try again!')
+      console.error('Update error:', err)
+      setLoading(false)
+    }
   }
 
   return (
@@ -147,8 +179,9 @@ function EditAccount() {
           <button
             onClick={handleDelete}
             className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+            disabled={loading}
           >
-            Delete Account
+            {loading ? 'Deleting Account...' : 'Delete Account'}
           </button>
         </div>
       </div>
