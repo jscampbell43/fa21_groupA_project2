@@ -5,6 +5,7 @@ import Signup from './pages/Signup'
 import Home from './pages/Home'
 import Wishlist from './pages/Wishlist'
 import AddItem from './pages/AddItem'
+import UpdateItem from './pages/UpdateItem'
 import EditAccount from './pages/EditAccount'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/add-item" element={<AddItem />} />
+          <Route path="/update-item" element={<UpdateItem />} />
           <Route path="/edit-account" element={<EditAccount />} />
         </Routes>
       </BrowserRouter>

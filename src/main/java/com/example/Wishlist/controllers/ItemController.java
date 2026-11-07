@@ -3,7 +3,6 @@ package com.example.Wishlist.controllers;
 
 import com.example.Wishlist.Database.ItemDAO;
 import com.example.Wishlist.Database.ItemDB;
-import com.example.Wishlist.service.ItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.web.bind.annotation.*;
@@ -132,11 +131,13 @@ public class ItemController {
         @Valid
         @RequestBody UpdateItemRequest request
     ){
-        // Check if item exists
+        // Fetch items by the itemId
         List<ItemDB> existingItems = itemDAO.findByItemId(request.getId());
+        // If item not found throw exception
         if (existingItems == null || existingItems.isEmpty()){
             throw new ItemNotFoundException(request.getId());
         }
+
         // Reconstruct ItemDB Entity
         ItemDB item = new ItemDB(
             request.getUserId(),
@@ -148,16 +149,16 @@ public class ItemController {
         // Update ID separately
         item.setId(request.getId());
         // Call the Service Method
-        String result = itemService.updateItem(item);
+        ItemDB updatedItem = itemDAO.save(item);
         // Create Response
         ItemResponse itemResponse = new ItemResponse(
-            item.getId(),
-            item.getName(),
-            item.getDescription(),
-            item.getItem_link(),
-            item.getImg_url(),
-            item.getList_name(),
-            item.getUser_id()
+            updatedItem.getId(),
+            updatedItem.getName(),
+            updatedItem.getDescription(),
+            updatedItem.getItem_link(),
+            updatedItem.getImg_url(),
+            updatedItem.getList_name(),
+            updatedItem.getUser_id()
         );
         // Return Response
         return ResponseEntity.ok(itemResponse);  
@@ -166,18 +167,21 @@ public class ItemController {
     // DELETE /items/deleteItem - Delete an item from the database
     // Request body contains the item to delete
     @DeleteMapping(value = "/deleteItem")
-    public ResponseEntity<Map<String, String>> deleteItem(@Valid @RequestBody DeleteItemRequest request){
-        List<ItemDB> existingItems = itemDAO.findByItemId(request.getId());
-        // Check if item exists
-        if (existingItems == null || existingItems.isEmpty()){
-            throw new ItemNotFoundException(request.getId());
-        }
-        // If item exists delete first occurence in list
-        ItemDB itemToDelete = existingItems.get(0);
-        String result = itemService.deleteItem(itemToDelete);
-        // Create Map to hold Response, Return Map
-        Map<String, String> response = new HashMap<>();
-        response.put("message", result);  // or use a custom message
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, String>> deleteItem(
+        @Valid 
+        @RequestBody DeleteItemRequest request){
+            // Fetch all items by itemId
+            List<ItemDB> existingItems = itemDAO.findByItemId(request.getId());
+            // Check if item exists
+            if (existingItems == null || existingItems.isEmpty()){
+                throw new ItemNotFoundException(request.getId());
+            }
+            // If item exists delete first occurence in list
+            ItemDB itemToDelete = existingItems.get(0);
+            itemDAO.delete(itemToDelete);
+            // Create Map to hold Response, Return Map
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Item Delete Successful");  // or use a custom message
+            return ResponseEntity.ok(response);
     }
 }

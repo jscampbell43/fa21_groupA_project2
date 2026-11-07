@@ -226,7 +226,7 @@ public class UserController {
 
             //Return success Response
             Map<String, String> response = new HashMap<>();
-            response.put("message", "Delete successful");
+            response.put("message", "User Delete successful");
             return ResponseEntity.ok(response);
         }
 

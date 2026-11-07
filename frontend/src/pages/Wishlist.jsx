@@ -76,6 +76,16 @@ function Wishlist() {
     }
   }
 
+  const handleItemUpdate = async (item) => {
+    console.log('Wishlist - item being passed:', item)
+    console.log('Wishlist - navigating with state:', item)
+    navigate('/update-item', { state: item})
+  }
+
+  const handleItemDelete = async () => {
+    console.log("DELETE GOES HERE")
+  }
+
   const handleLogout = async () => {
     await logout()
     navigate('/')
@@ -159,6 +169,20 @@ function Wishlist() {
                 )}
                 <p className="text-gray-600 mb-2">{item.description}</p>
                 <p className="text-sm text-gray-500">List: {item.listName}</p>
+                <button
+                  onClick={() => handleItemUpdate(item)}
+                  className="mr-4 bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
+                  disabled={loading}
+                >
+                  {loading ? 'Updating...' : 'Update'}
+                </button>
+                <button
+                  onClick={handleItemDelete}
+                  className="mr-4 bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  disabled={loading}
+                >
+                  {loading ? 'Deleting Account...' : 'Delete'}
+                </button>
               </div>
             ))}
           </div>

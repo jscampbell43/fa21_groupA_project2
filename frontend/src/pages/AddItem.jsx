@@ -16,6 +16,11 @@ function AddItem() {
   const navigate = useNavigate()
   const { userId, logout } = useAuth()
 
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
+  }
+
   const validateForm = () => {
     if (!name.trim()) {
       setError('Item Name is required')
@@ -91,10 +96,6 @@ function AddItem() {
     }
   }
 
-  const handleLogout = async () => {
-    await logout()
-    navigate('/')
-  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">

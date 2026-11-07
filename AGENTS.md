@@ -609,6 +609,108 @@ These features should be added after completing all modernization phases (Phases
   - Test 12: Login with new password after update
   - Test 13: Verify old password rejected after password change
 
+### Session 2026-11-06 (Delete User & Item CRUD Frontend)
+- **Delete User Functionality - COMPLETE**
+  - ItemDAO.deleteItemsByUserId() - Added native SQL DELETE query to delete all items by userId
+    - Uses @Modifying and @Transactional annotations
+    - Deletes from ITEMS table (corrected from "ItemDB" to "ITEMS")
+  - DeleteUserRequest.java - DTO with userId and password fields (username removed as not needed)
+  - UserController.deleteUser() - Added DELETE /users/delete endpoint
+    - Fetches user by userId using userDAO.findUserByUserId()
+    - Throws UserNotFoundException if user not found
+    - Verifies password using passwordEncoder.matches() before deletion
+    - Throws PasswordNotFoundException if password is incorrect
+    - Deletes user's items first using itemDAO.deleteItemsByUserId()
+    - Deletes user using userDAO.delete()
+    - Returns Map<String, String> with success message
+    - Fixed parameter name typo (requset → request)
+    - Changed return type from UserResponse to Map<String, String>
+  - api.js - Added deleteUser method to userAPI
+    - Accepts userId, username, password parameters
+    - Sends DELETE request to /users/delete with data body
+    - Added leading slash to URL (/users/delete)
+  - AuthContext.jsx - Added deleteUser function
+    - Gets userId from user state
+    - Calls userAPI.deleteUser()
+    - On success: clears user state and sessionStorage (using removeItem, not setItem with empty string)
+    - Uses response.status === 200 || response.data.message check for success
+    - Returns success/error response object
+    - Added deleteUser to context value object
+  - EditAccount.jsx - Updated handleDelete function
+    - Added deleteUser to useAuth destructuring
+    - Added confirmation dialog before deletion
+    - Calls deleteUser(username, password) from auth context
+    - Handles success: shows success message, navigates to home after 2 seconds
+    - Handles errors: parses JSON errors from GlobalExceptionHandler
+    - Added disabled state and loading text to delete button
+  - Tested delete user flow successfully
+
+- **ItemController Refactoring to DAO Direct - COMPLETE**
+  - Decision: Standardize on DAO direct pattern (Option B) for consistency with UserController
+  - ItemController.deleteItem() - Refactored to use itemDAO directly
+    - Removed itemService.deleteItem() call
+    - Changed to itemDAO.delete(itemToDelete)
+    - JPA generates DELETE SQL automatically
+    - Simpler flow: Controller → ItemDAO directly
+  - ItemController.updateItem() - Refactored to use itemDAO directly
+    - Removed itemService.updateItem() call
+    - Changed to itemDAO.save(item)
+    - JPA performs UPDATE when entity has existing ID
+    - Returns updatedItem from save() for response
+    - More precise: updates only the specific item by ID
+  - Removed ItemService import from ItemController
+  - ItemService.java - Can now be deleted (no longer used by ItemController)
+  - Consistency achieved: Both UserController and ItemController now use DAO direct pattern
+
+- **Update Item Frontend - COMPLETE**
+  - App.jsx - Added UpdateItem route (/updateitem)
+  - UpdateItem.jsx - Created new page for updating items
+    - Uses useLocation hook to access navigation state
+    - Uses useState to manage item data
+    - useEffect validates state (checks if state and state.name exist)
+    - useEffect sets local form state from navigation state (state.name, state.description, etc.)
+    - Uses optional chaining for safe property access (item?.name)
+    - Redirects to /wishlist if state is missing
+    - Form fields pre-populated with existing item data
+    - Controlled inputs with useState for name, description, link, image, list
+    - Validation: name and list are required
+    - Calls itemAPI.updateItem() with id, userId, name, description, link, image, listName
+    - Includes item.id in request body for backend to identify which item to update
+    - Handles errors from GlobalExceptionHandler
+    - Loading state prevents duplicate submissions
+    - Navigates to /wishlist on success
+  - Wishlist.jsx - Added update button to each item
+    - handleItemUpdate(item) - Accepts item parameter
+    - Uses navigate('/update-item', { state: item}) to pass item data
+    - Removed setTimeout (no longer needed)
+    - Added console logs for debugging
+    - Fixed onClick to use arrow function: onClick={() => handleItemUpdate(item)}
+    - Prevents "Expected onClick listener to be a function" error
+  - Key issues resolved:
+    - Async functions return Promises, not functions - must wrap in arrow functions in onClick
+    - React Router state timing - use useEffect to handle state after render
+    - State passed as item becomes state directly (state.item vs state)
+    - Field pre-population - use state directly in useEffect, not after setItem()
+    - Property name mismatch - use listName, not list
+
+- **Key Issues Encountered and Resolved:**
+  1. **ItemDAO table name error** - Changed "DELETE FROM ItemDB" to "DELETE FROM ITEMS"
+  2. **UserController parameter typo** - Fixed "requset" to "request"
+  3. **UserController return type** - Changed from UserResponse to Map<String, String>
+  4. **AuthContext success check** - Changed from checking response.data.userId to response.status === 200
+  5. **AuthContext sessionStorage** - Changed from setItem('') to removeItem()
+  6. **onClick handler error** - Async functions return Promises, must use arrow function onClick={() => func(item)}
+  7. **UpdateItem state timing** - Cannot access state at top level, must use useEffect
+  8. **UpdateItem undefined property** - Cannot access item.name during initial render, use optional chaining
+  9. **Field pre-population not working** - React state updates are async, use state directly in useEffect
+  10. **Property name mismatch** - Item has listName, not list
+
+- **Current Status:**
+  - User CRUD: ✅ COMPLETE (Create, Read, Update, Delete)
+  - Item CRUD Backend: ✅ COMPLETE (Create, Read, Update, Delete - using DAO direct)
+  - Item CRUD Frontend: ⚠️ PARTIAL (Create ✅, Update ✅, Delete ❌)
+  - Next: Implement Delete Item frontend functionality
+
 ### Session 2026-10-14 (Part 1)
 - Created AGENTS.md file to document project state
 - Reviewed git history and codebase structure
