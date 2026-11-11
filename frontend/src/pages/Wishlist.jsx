@@ -9,6 +9,7 @@ function Wishlist() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const navigate = useNavigate()
   const { userId, logout, loading: authLoading } = useAuth()
   const finalUserId = userId
@@ -77,13 +78,42 @@ function Wishlist() {
   }
 
   const handleItemUpdate = async (item) => {
-    console.log('Wishlist - item being passed:', item)
-    console.log('Wishlist - navigating with state:', item)
     navigate('/update-item', { state: item})
   }
 
-  const handleItemDelete = async () => {
-    console.log("DELETE GOES HERE")
+  const handleItemDelete = async (item) => {
+    setError('')
+    setSuccess('')
+    
+     // Add confirmation dialog before deleting account
+    if (!window.confirm('Are you sure you want to delete your this item? This action cannot be undone.')) {
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const result = await itemAPI.deleteItem(item)
+      setSuccess('Item deleted successfully!')
+      // Remove the deleted item from the items array
+      setItems(items.filter(i => i.id !== item.id))
+      setLoading(false) 
+    } catch (err) {
+      if (err.response && err.response.data) {
+        if (err.response.data.errors) {
+          const firstError = Object.values(err.response.data.errors)[0]
+          setError(firstError)
+        } else if (err.response.data.message) {
+          setError(err.response.data.message)
+        } else {
+          setError('Something went wrong, please try again.')
+        }
+      } else {
+        setError('Something went wrong, please try again!')
+      }
+      console.error('Delete error:', err)
+      setLoading(false)
+    }
   }
 
   const handleLogout = async () => {
@@ -126,6 +156,12 @@ function Wishlist() {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {success}
           </div>
         )}
 
@@ -177,7 +213,7 @@ function Wishlist() {
                   {loading ? 'Updating...' : 'Update'}
                 </button>
                 <button
-                  onClick={handleItemDelete}
+                  onClick={() => handleItemDelete(item)}
                   className="mr-4 bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
                   disabled={loading}
                 >

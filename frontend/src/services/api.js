@@ -51,7 +51,7 @@ export const itemAPI = {
     api.put('/items/updateItem', item),
 
   deleteItem: (item) =>
-    api.delete('/items/deleteItem', item),
+    api.delete('/items/deleteItem', {data: {id: item.id}}),
 }
 
 export default api

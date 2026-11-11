@@ -31,9 +31,6 @@ public class ItemController {
     private List<ItemDB> item;
     private ItemDAO itemDAO;
 
-    @Autowired
-    private ItemService itemService;
-
     // Constructor injection of ItemDAO for database operations
     public ItemController(ItemDAO itemDAO){
         this.itemDAO = itemDAO;

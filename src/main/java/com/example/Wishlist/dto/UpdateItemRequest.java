@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.URL;
 
 /**
  * Data Transfer Object for Update Item request
@@ -18,6 +19,7 @@ public class UpdateItemRequest {
     @NotBlank(message = "Name is required")
     private String name;
     private String description;
+    @URL(protocol = "https", message = "Link must be a valid HTTPS URL")
     private String link;
     private String image;
     @NotBlank(message = "List name is required")

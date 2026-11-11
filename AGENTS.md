@@ -711,6 +711,106 @@ These features should be added after completing all modernization phases (Phases
   - Item CRUD Frontend: ⚠️ PARTIAL (Create ✅, Update ✅, Delete ❌)
   - Next: Implement Delete Item frontend functionality
 
+- **URL Validation - COMPLETE**
+  - Added @URL annotation to AddItemRequest.link field
+  - Added @URL annotation to UpdateItemRequest.link field
+  - Configured with protocol = "http" to allow both HTTP and HTTPS URLs
+  - Custom error message: "Invalid URL format"
+  - Hibernate Validator automatically validates URLs
+  - Frontend error handling displays validation errors to users
+  - Tested with valid and invalid URLs - working correctly
+
+- **Known Security Issues (To Be Fixed During Spring Security Implementation):**
+  - **User Ownership Validation Not Implemented:**
+    - Current backend accepts any userId in request body for item update/delete operations
+    - A malicious user could send a request with someone else's item ID and update/delete it
+    - Frontend only shows user's own items (UI protection), but backend has no ownership check
+    - Vulnerability: Cross-user item updates/deletes possible if item ID is known
+    - **Fix Plan:** When implementing full Spring Security:
+      - Use authentication context to get authenticated user's ID
+      - Add validation in ItemController.updateItem() to check if item.getUserId() matches authenticated user
+      - Add validation in ItemController.deleteItem() to check if item.getUserId() matches authenticated user
+      - Throw UnauthorizedAccessException if ownership doesn't match
+      - Return HTTP 403 Forbidden for unauthorized access attempts
+      - Remove userId from request body DTOs (use authenticated user ID from security context)
+    - **Testing Reminder:** After implementing Spring Security, conduct cross-user deletion test:
+      - Login as User A, get item ID
+      - Logout, login as User B
+      - Use DevTools to attempt deletion of User A's item
+      - Verify backend returns HTTP 403 Forbidden
+      - Verify item is NOT deleted
+  - **Note:** Documented as known security gap. Will be addressed during Phase 3 (Full Spring Security) implementation.
+
+### Session 2026-11-10 (Delete Item Frontend & URL Validation - COMPLETE)
+- **Delete Item Frontend - COMPLETE**
+  - api.js - Fixed deleteItem method to use Axios DELETE with data in config object
+    - Changed from `api.delete('/items/deleteItem', item)` to `api.delete('/items/deleteItem', {data: {id: item.id}})`
+    - Axios DELETE requires body in `data` property for proper formatting
+  - Wishlist.jsx - Implemented handleItemDelete function
+    - Added confirmation dialog before deletion
+    - Added success and error state management
+    - Fixed error handling to check if err.response exists before accessing err.response.data
+    - Removed dead code (else block that would never execute)
+    - On success: filters items array to remove deleted item (no page reload)
+    - On success: updates local state, React re-renders without item
+    - Loading state prevents duplicate submissions
+    - Error handling parses JSON errors from GlobalExceptionHandler
+  - Wishlist.jsx - Added delete button to each item
+    - Uses arrow function onClick={() => handleItemDelete(item)} to pass item
+    - Button disabled during loading
+  - Testing completed for all delete scenarios (18 test cases)
+  - Delete functionality working correctly
+
+- **Update Item Testing - COMPLETE**
+  - Tested all 20 update item scenarios
+  - All tests passed successfully
+  - Field pre-population working correctly
+  - Partial updates working (name only, description only, etc.)
+  - Validation working correctly
+  - Navigation with React Router state working
+  - Error handling working correctly
+
+- **URL Validation - COMPLETE**
+  - Added @URL annotation to AddItemRequest.link field
+  - Added @URL annotation to UpdateItemRequest.link field
+  - Configured with protocol = "http" to allow both HTTP and HTTPS URLs
+  - Custom error message: "Invalid URL format"
+  - Hibernate Validator automatically validates URLs
+  - Frontend error handling displays validation errors to users
+  - Tested with valid and invalid URLs - working correctly
+
+- **Current Status:**
+  - User CRUD: ✅ COMPLETE (Create, Read, Update, Delete)
+  - Item CRUD Backend: ✅ COMPLETE (Create, Read, Update, Delete - using DAO direct)
+  - Item CRUD Frontend: ✅ COMPLETE (Create, Read, Update, Delete)
+  - URL Validation: ✅ COMPLETE
+  - Admin Functionality: ❌ NOT STARTED
+  - Spring Security: ⚠️ DISABLED (manual authentication in use)
+
+- **Remaining Phases:**
+  - Phase 3: Full Spring Security Implementation (NEXT - to start tomorrow)
+    - Re-enable Spring Security web security
+    - Fix user ownership validation (cross-user update/delete prevention)
+    - Add CSRF protection
+    - Add React route guards
+  - Phase 4: Admin User Flows
+    - Admin role system
+    - Admin user management page
+    - Admin item management page
+    - Admin dashboard
+  - Phase 5: List Management (Optional)
+    - Update list names
+    - Delete entire lists
+  - Phase 6: Testing (Optional)
+  - Phase 7: DevOps (Optional)
+
+- **Key Issues Encountered and Resolved:**
+  1. **Axios DELETE with body error** - Fixed by using {data: {id: item.id}} config object
+  2. **Axios response structure confusion** - Clarified that successful responses have result.data, err.response exists only in catch block
+  3. **Dead code in else block** - Removed else block that would never execute (Axios throws errors for 4xx/5xx)
+  4. **itemAPI.deleteItem response structure** - Fixed success check from result.success to result.status === 200
+  5. **UI update without page reload** - Implemented setItems(items.filter(i => i.id !== item.id)) for immediate UI update
+
 ### Session 2026-10-14 (Part 1)
 - Created AGENTS.md file to document project state
 - Reviewed git history and codebase structure
