@@ -3,8 +3,19 @@ import axios from 'axios'
 // Create an Axios instance configured for the backend
 const api = axios.create({
   baseURL: '', // Will be proxied to http://localhost:8080 during development
+  withCredentials: true // Send session cookies for Spring Security
 })
 
+
+// Auth API calls (removed - using manual authentication in UserController)
+// export const authAPI = {
+//   login: (username, password) =>
+//     api.post('/auth/login', { username, password }),
+//   getCurrentUser: () =>
+//     api.get('/auth/me'),
+//   logout: () =>
+//     api.post('/auth/logout'),
+// }
 
 // User API calls
 export const userAPI = {
@@ -17,7 +28,7 @@ export const userAPI = {
   logout: () =>
     api.get('/users/logout'),
 
-  getUser: (username) =>
+  findUserByName: (username) =>
     api.get(`/users/${username}`),
 
   getAllUsers: () =>

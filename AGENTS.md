@@ -124,12 +124,70 @@ This file tracks progress and context for Devin sessions working on this project
 - Currently has uncommitted changes
 
 ### Known Issues/Work in Progress
-- Spring Security web security is disabled (auto-configuration excluded in application.properties)
-  - @EnableWebSecurity commented out in SecurityConfig.java
-  - Custom manual authentication via /users/login endpoint
-  - Spring Security PasswordEncoder bean still available for password hashing/verification
-  - This is a valid architecture for manual auth with Spring Security utilities
+- **Spring Security Status (2026-11-11 Session) - PARTIALLY DISABLED**
+  - Current state: Spring Security web security filters are running despite configuration attempts
+  - @EnableWebSecurity is commented out in SecurityConfig.java
+  - Auto-configuration exclusion added to application.properties:
+    ```
+    spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+    ```
+  - Despite the exclusion, Spring Security's DefaultSecurityFilterChain is still active (visible in logs)
+  - DefaultLoginPageGeneratingFilter is still intercepting requests and causing 302 redirects to /login
+  - Manual authentication endpoints (/users/login, /users/signup) are currently working
+  - Spring Security PasswordEncoder bean is available for password hashing/verification
+  - CORS is working via CorsConfig.java
+  - **USER'S GOAL:** Fully enable Spring Security when complete (not yet achieved)
+  - **CURRENT WORKAROUND:** Application is functional with manual authentication, but Spring Security web security is not properly configured
   - CSRF is disabled - enable before production
+
+### Spring Security Troubleshooting Session (2026-11-11)
+**Goal:** Enable Spring Security's built-in authentication while keeping custom React login/signup pages
+
+**Steps Attempted:**
+1. Removed auto-configuration exclusion from application.properties
+2. Enabled @EnableWebSecurity in SecurityConfig.java
+3. Created AuthController.java with /auth/login, /auth/me, /auth/logout endpoints
+4. Updated frontend to use new authAPI endpoints
+5. Encountered bean injection errors (AuthenticationManager not found)
+6. Tried using DaoAuthenticationProvider instead of AuthenticationManager - same error
+7. Tried adding .authenticationProvider() to SecurityFilterChain - same error
+8. Reverted to manual authentication in UserController
+9. Added .formLogin(form -> form.disable()) and .httpBasic(basic -> basic.disable()) to SecurityConfig
+10. Still getting 302 redirect to /login on signup/login requests
+11. Logs showed DefaultLoginPageGeneratingFilter still active despite disable() calls
+12. Commented out @EnableWebSecurity again
+13. Re-added auto-configuration exclusion to application.properties
+14. Application now working with manual authentication, but Spring Security filters still running in background
+
+**Root Cause Analysis:**
+- The 302 redirect to /login was caused by Spring Security's DefaultLoginPageGeneratingFilter intercepting requests
+- .formLogin(form -> form.disable()) does not actually disable the filter in Spring Security 6
+- The auto-configuration exclusion (spring.autoconfigure.exclude) did not prevent Spring Security filters from loading
+- Bean injection failures occurred because AuthenticationManager bean wasn't properly exposed for autowiring
+- Multiple CORS configurations existed (CorsConfig.java + SecurityConfig corsConfigurationSource bean) - potential conflict
+
+**Why It's Currently Working:**
+- Manual authentication endpoints (/users/login, /users/signup) are listed as permitAll() in SecurityConfig
+- Spring Security filter chain is running but allowing these endpoints through
+- The 302 redirect may be occurring but not blocking actual functionality (user reported "it seems to be working now")
+- User cleared browser history and cache before testing - this may have resolved session-related issues
+
+**User Notes:**
+- User cleared browser history including cache before testing sign-in process
+- User confirmed application is working currently
+- User's goal: Still wants fully enabled Spring Security when complete
+- Current state is a workaround, not the final desired state
+
+**Next Steps for Tomorrow:**
+To properly enable Spring Security, consider these approaches:
+1. **Option A:** Remove spring-boot-starter-security dependency completely, use alternative password encoding
+2. **Option B:** Properly enable Spring Security with correct configuration:
+   - Keep @EnableWebSecurity enabled
+   - Remove auto-configuration exclusion
+   - Use AuthenticationManager from AuthenticationConfiguration (not autowired)
+   - Disable form login with different approach (custom SecurityFilterChain without default filters)
+   - Or accept Spring Security's default login and style it with React
+3. **Option C:** Keep current working state (manual auth with Spring Security in background) and move to other features
 - Database has uncommitted changes (test users added)
 - **Authentication State Management** (COMPLETED - 2026-10-22)
   - ✅ Implemented React Context for authentication state management

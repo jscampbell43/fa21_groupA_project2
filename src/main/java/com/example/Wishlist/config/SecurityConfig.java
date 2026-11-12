@@ -5,12 +5,16 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 // @EnableWebSecurity // DISABLED - Using manual authentication with Spring Security password encoding
@@ -40,15 +44,39 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
-            .csrf(csrf -> csrf.disable()) // CSRF TOKENS DISABLED; ENABLE BEFORE COMPLETING APP
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/customLogin.html", "/signUp.html", "/styles.css", "/signUp.js", "/users/signup", "/users/login", "/logout").permitAll()
-                .anyRequest().authenticated()
+                // Allow manual auth endpoints
+                .requestMatchers("/users/login", "/users/signup", "/users/logout").permitAll()
+                // Allow React frontend routes
+                .requestMatchers("/", "/signup", "/login", "/home", "/wishlist", "/add-item", "/edit-account", "/update-item").permitAll()
+                // Allow static resources
+                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                // Allow Swagger
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                // Protect API endpoints
+                .requestMatchers("/items/**").authenticated()
+                .requestMatchers("/users/update", "/users/delete").authenticated()
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form.disable()) // Disable default form login
-            .httpBasic(basic -> basic.disable())
-            .authenticationProvider(authenticationProvider());
+            .httpBasic(basic -> basic.disable()); // Disable basic auth
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowCredentials(true);
+        configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://localhost:5174");
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

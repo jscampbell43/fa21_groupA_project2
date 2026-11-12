@@ -7,6 +7,7 @@ import Wishlist from './pages/Wishlist'
 import AddItem from './pages/AddItem'
 import UpdateItem from './pages/UpdateItem'
 import EditAccount from './pages/EditAccount'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -15,11 +16,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/add-item" element={<AddItem />} />
-          <Route path="/update-item" element={<UpdateItem />} />
-          <Route path="/edit-account" element={<EditAccount />} />
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/add-item" element={<ProtectedRoute><AddItem /></ProtectedRoute>} />
+          <Route path="/update-item" element={<ProtectedRoute><UpdateItem /></ProtectedRoute>} />
+          <Route path="/edit-account" element={<ProtectedRoute><EditAccount /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
