@@ -7,16 +7,6 @@ const api = axios.create({
 })
 
 
-// Auth API calls (removed - using manual authentication in UserController)
-// export const authAPI = {
-//   login: (username, password) =>
-//     api.post('/auth/login', { username, password }),
-//   getCurrentUser: () =>
-//     api.get('/auth/me'),
-//   logout: () =>
-//     api.post('/auth/logout'),
-// }
-
 // User API calls
 export const userAPI = {
   login: (username, password) =>

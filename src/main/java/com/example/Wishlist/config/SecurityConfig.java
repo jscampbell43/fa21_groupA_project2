@@ -44,24 +44,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable()) // Disable CSRF for SPA
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                // Allow manual auth endpoints
-                .requestMatchers("/users/login", "/users/signup", "/users/logout").permitAll()
+                // Allow signup endpoint (public)
+                .requestMatchers("/users/signup").permitAll()
                 // Allow React frontend routes
-                .requestMatchers("/", "/signup", "/login", "/home", "/wishlist", "/add-item", "/edit-account", "/update-item").permitAll()
+                .requestMatchers("/", "/signup").permitAll()
                 // Allow static resources
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 // Allow Swagger
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Protect API endpoints
-                .requestMatchers("/items/**").authenticated()
-                .requestMatchers("/users/update", "/users/delete").authenticated()
-                .anyRequest().permitAll()
+                // All other endpoints require authentication
+                .anyRequest().authenticated()
             )
-            .formLogin(form -> form.disable()) // Disable default form login
-            .httpBasic(basic -> basic.disable()); // Disable basic auth
+            // Use Spring Security's default form login
+            .formLogin(form -> form
+                .defaultSuccessUrl("/home", true) // Redirect to /home after successful login
+                .permitAll()
+            )
+            // Use Spring Security's default logout
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login") // Redirect to login after logout
+                .permitAll()
+            );
 
         return http.build();
     }

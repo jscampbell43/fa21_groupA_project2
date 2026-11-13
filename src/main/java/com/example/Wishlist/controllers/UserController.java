@@ -5,9 +5,7 @@ import com.example.Wishlist.Database.UserDB;
 import com.example.Wishlist.Database.ItemDAO;
 import com.example.Wishlist.Database.ItemDB;
 
-import org.apache.catalina.User;
 import org.springframework.web.bind.annotation.*;
-
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -118,24 +116,20 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
-    // POST /users/login - Authenticate a user (manual authentication for custom login page)
-    // Parameters: username, password
+    // POST /users/login - Authenticate a user (manual authentication)
     @PostMapping(value = "/login")
     public ResponseEntity<UserResponse> loginUser(
         @Valid
         @RequestBody LoginRequest request
     ){
-        // If Username is not in database throw UserNotFoundException
         UserDB user = userDAO.findUserByName(request.getUsername());
         if (user == null) {
             throw new UserNotFoundException(request.getUsername());
         }
-        // If Password does not match throw PassWordNotFoundException
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new PasswordNotFoundException(request.getUsername());
         }
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            // Create authentication token
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                 request.getUsername(),
                 null,

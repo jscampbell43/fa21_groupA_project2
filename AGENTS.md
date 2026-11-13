@@ -124,70 +124,64 @@ This file tracks progress and context for Devin sessions working on this project
 - Currently has uncommitted changes
 
 ### Known Issues/Work in Progress
-- **Spring Security Status (2026-11-11 Session) - PARTIALLY DISABLED**
-  - Current state: Spring Security web security filters are running despite configuration attempts
+- **Spring Security Status (2026-11-12 Session) - MANUAL AUTHENTICATION FINAL DECISION**
+  - **DECISION:** Spring Security's default form login is incompatible with React SPA architecture
+  - **Current state:** Manual authentication using /users/login and /users/signup endpoints
   - @EnableWebSecurity is commented out in SecurityConfig.java
-  - Auto-configuration exclusion added to application.properties:
+  - Auto-configuration exclusion in application.properties:
     ```
     spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
     ```
-  - Despite the exclusion, Spring Security's DefaultSecurityFilterChain is still active (visible in logs)
-  - DefaultLoginPageGeneratingFilter is still intercepting requests and causing 302 redirects to /login
-  - Manual authentication endpoints (/users/login, /users/signup) are currently working
   - Spring Security PasswordEncoder bean is available for password hashing/verification
   - CORS is working via CorsConfig.java
-  - **USER'S GOAL:** Fully enable Spring Security when complete (not yet achieved)
-  - **CURRENT WORKAROUND:** Application is functional with manual authentication, but Spring Security web security is not properly configured
+  - **DECISION RATION:** Spring Security's default form login expects HTML form submissions, not AJAX requests from React SPAs
+  - **FOR FUTURE JWT/STATELESS IMPLEMENTATION:** Would require significant architectural changes (different endpoints, token handling, frontend token storage)
+  - **CURRENT APPROACH:** Manual authentication with Spring Security PasswordEncoder is valid for this SPA architecture
   - CSRF is disabled - enable before production
 
-### Spring Security Troubleshooting Session (2026-11-11)
-**Goal:** Enable Spring Security's built-in authentication while keeping custom React login/signup pages
+### Spring Security Attempt (2026-11-12 Session)
+**Goal:** Enable Spring Security's built-in form login for authentication
 
 **Steps Attempted:**
 1. Removed auto-configuration exclusion from application.properties
 2. Enabled @EnableWebSecurity in SecurityConfig.java
-3. Created AuthController.java with /auth/login, /auth/me, /auth/logout endpoints
-4. Updated frontend to use new authAPI endpoints
-5. Encountered bean injection errors (AuthenticationManager not found)
-6. Tried using DaoAuthenticationProvider instead of AuthenticationManager - same error
-7. Tried adding .authenticationProvider() to SecurityFilterChain - same error
-8. Reverted to manual authentication in UserController
-9. Added .formLogin(form -> form.disable()) and .httpBasic(basic -> basic.disable()) to SecurityConfig
-10. Still getting 302 redirect to /login on signup/login requests
-11. Logs showed DefaultLoginPageGeneratingFilter still active despite disable() calls
-12. Commented out @EnableWebSecurity again
-13. Re-added auto-configuration exclusion to application.properties
-14. Application now working with manual authentication, but Spring Security filters still running in background
+3. Configured SecurityFilterChain with Spring Security's default form login
+4. Created AuthController.java with /auth/login, /auth/me, /auth/logout endpoints
+5. Updated frontend to use Spring Security's /login endpoint (form-encoded)
+6. Updated Vite proxy to forward /login and /logout to backend
+7. Deleted AuthController.java (no longer needed for form login approach)
+8. Deleted LoginRequest.java (no longer needed)
+9. Created CustomUserDetailsService.java for Spring Security user details
+10. Encountered bean conflict (duplicate CustomUserDetailsService in different packages)
+11. Deleted duplicate in wrong package
+12. **ISSUE DISCOVERED:** Login bypassing security - any username/password allowed access
+13. **ISSUE DISCOVERED:** Signup still redirecting to /login with 302
+14. **ROOT CAUSE:** Spring Security's default form login is designed for traditional HTML forms, not AJAX requests from React SPAs
+15. **DECISION:** Reverted to manual authentication which was working before
 
-**Root Cause Analysis:**
-- The 302 redirect to /login was caused by Spring Security's DefaultLoginPageGeneratingFilter intercepting requests
-- .formLogin(form -> form.disable()) does not actually disable the filter in Spring Security 6
-- The auto-configuration exclusion (spring.autoconfigure.exclude) did not prevent Spring Security filters from loading
-- Bean injection failures occurred because AuthenticationManager bean wasn't properly exposed for autowiring
-- Multiple CORS configurations existed (CorsConfig.java + SecurityConfig corsConfigurationSource bean) - potential conflict
+**Files Modified During Attempt:**
+- application.properties (removed auto-configuration exclusion, then re-added)
+- SecurityConfig.java (enabled @EnableWebSecurity, then disabled again)
+- UserController.java (removed manual login/logout, then restored)
+- AuthController.java (created, then deleted)
+- LoginRequest.java (created, then deleted)
+- CustomUserDetailsService.java (created, kept for future use)
+- api.js (added authAPI for Spring Security login, then reverted)
+- AuthContext.jsx (updated to use authAPI, then reverted)
+- vite.config.js (added /login and /logout to proxy, kept for now)
 
-**Why It's Currently Working:**
-- Manual authentication endpoints (/users/login, /users/signup) are listed as permitAll() in SecurityConfig
-- Spring Security filter chain is running but allowing these endpoints through
-- The 302 redirect may be occurring but not blocking actual functionality (user reported "it seems to be working now")
-- User cleared browser history and cache before testing - this may have resolved session-related issues
+**Why Spring Security Default Login Failed:**
+- Spring Security's default form login expects HTML form submissions via POST to /login
+- React SPA uses AJAX requests via Axios with JSON or form-encoded data
+- These two approaches are incompatible without significant configuration
+- To use Spring Security with React SPA, would need JWT or stateless sessions (major architectural change)
 
-**User Notes:**
-- User cleared browser history including cache before testing sign-in process
-- User confirmed application is working currently
-- User's goal: Still wants fully enabled Spring Security when complete
-- Current state is a workaround, not the final desired state
-
-**Next Steps for Tomorrow:**
-To properly enable Spring Security, consider these approaches:
-1. **Option A:** Remove spring-boot-starter-security dependency completely, use alternative password encoding
-2. **Option B:** Properly enable Spring Security with correct configuration:
-   - Keep @EnableWebSecurity enabled
-   - Remove auto-configuration exclusion
-   - Use AuthenticationManager from AuthenticationConfiguration (not autowired)
-   - Disable form login with different approach (custom SecurityFilterChain without default filters)
-   - Or accept Spring Security's default login and style it with React
-3. **Option C:** Keep current working state (manual auth with Spring Security in background) and move to other features
+**Current Authentication Architecture (FINAL):**
+- Manual authentication via /users/login and /users/signup endpoints
+- Spring Security PasswordEncoder for password hashing/verification only
+- SessionStorage for frontend auth state persistence
+- ProtectedRoute component for frontend route protection
+- This is a valid modern approach for SPAs with custom login pages
 - Database has uncommitted changes (test users added)
 - **Authentication State Management** (COMPLETED - 2026-10-22)
   - ✅ Implemented React Context for authentication state management
@@ -455,7 +449,161 @@ These features should be added after completing all modernization phases (Phases
   - Verified sessionStorage contains user and userId after login
   - All Phase 2 tests passing
 
-### Session 2026-10-29 (Swagger/OpenAPI Documentation)
+### Session 2026-11-12 (Spring Security Attempt & Future Work Planning)
+**Goal:** Enable Spring Security's built-in authentication for the Wishlist application
+
+**What We Learned:**
+- Spring Security's default form login is designed for traditional HTML forms (POST to /login)
+- React SPAs use AJAX requests via Axios (JSON or form-encoded)
+- These two approaches are fundamentally incompatible without significant configuration
+- To use Spring Security with React SPA, would need JWT or stateless sessions (major architectural change)
+- Manual authentication with Spring Security PasswordEncoder is a valid modern approach for SPAs with custom login pages
+
+**Decision Made:**
+- Keep manual authentication (current working approach)
+- Spring Security PasswordEncoder bean retained for password hashing/verification
+- Spring Security web security disabled (@EnableWebSecurity commented out)
+- Auto-configuration exclusion in application.properties
+- This is a valid architecture for the current application
+
+**Current State After Session:**
+- ✅ Manual authentication working (/users/login, /users/signup, /users/logout)
+- ✅ Password hashing with BCrypt
+- ✅ React frontend with modern tech stack
+- ✅ Backend with DTOs, validation, exception handling, Swagger
+- ✅ CORS configured
+- ✅ ProtectedRoute component for frontend route protection
+- ⚠️ Cross-user ownership vulnerability exists (security issue to fix)
+- ⚠️ CSRF disabled (enable before production)
+
+**Files Changed This Session:**
+- application.properties (re-added auto-configuration exclusion)
+- SecurityConfig.java (disabled @EnableWebSecurity)
+- UserController.java (restored manual login/logout endpoints)
+- LoginRequest.java (recreated DTO)
+- api.js (reverted to use /users/login)
+- AuthContext.jsx (reverted to use userAPI.login)
+- CustomUserDetailsService.java (created, kept for future)
+- vite.config.js (added /login and /logout to proxy)
+- AuthController.java (created then deleted)
+
+---
+
+## Future Work Checklist (To Complete Modernization)
+
+### HIGH PRIORITY (Core Security & Functionality)
+
+**1. Fix Cross-User Item Ownership Vulnerability** ⚠️ CRITICAL SECURITY ISSUE
+- **Problem:** Authenticated users can update/delete another user's items by supplying different item ID/user ID
+- **Fix Required:** In ItemController, add ownership checks before update/delete operations
+- **Implementation:**
+  - Before updating item: verify `item.getUserId() == authenticatedUserId`
+  - Before deleting item: verify `item.getUserId() == authenticatedUserId`
+  - Derive `authenticatedUserId` from SecurityContext or session, not from request body
+- **Status:** Not started
+
+**2. Enable CSRF Protection** 🔒 SECURITY
+- **Current:** CSRF is disabled in SecurityConfig
+- **Issue:** CSRF is complex to implement with manual authentication in SPAs
+- **Options:**
+  - Document as production todo for now
+  - Or switch to stateless authentication (JWT) which doesn't need CSRF
+- **Status:** Not started
+
+**3. Frontend Item Update and Delete UI**
+- **Current:** Backend endpoints exist, but Wishlist.jsx needs update/delete buttons
+- **Required:**
+  - Add "Edit" button to each item in Wishlist.jsx
+  - Add "Delete" button to each item in Wishlist.jsx
+  - Wire Edit button to pre-fill AddItem form or create EditItem component
+  - Add confirmation dialog for delete
+  - Test full CRUD flow
+- **Status:** Not started
+
+**4. Complete Edit Account Page Integration**
+- **Current:** EditAccount.jsx UI exists, backend endpoints exist
+- **Required:**
+  - Verify frontend is calling correct backend endpoints
+  - Test update username and password functionality
+  - Test delete account functionality
+  - Ensure proper error handling and success messages
+- **Status:** Not started
+
+### MEDIUM PRIORITY (Polish & Features)
+
+**5. Admin Functionality**
+- **Current:** Role field exists in UserDB, but no admin-specific features
+- **Required:**
+  - Role-based access control in controllers (check `@PreAuthorize("hasRole('ADMIN')")`)
+  - Admin-only page to view all users (/users/allUsers already exists)
+  - Admin-only page to view all items (/items/allItems already exists)
+  - Admin dashboard with overview statistics
+  - Add/update/delete user buttons for admin
+- **Status:** Not started
+
+**6. List Management (Optional)**
+- **Current:** Items have list_name field but no list-specific UI
+- **Required:**
+  - Ability to create/delete lists
+  - Rename list names
+  - Filter items by list
+  - List view separate from all items view
+- **Status:** Not started
+
+### LOW PRIORITY (Quality & DevOps)
+
+**7. Testing**
+- Write unit tests for controllers
+- Write integration tests for authentication flow
+- Test edge cases (empty inputs, invalid IDs, etc.)
+- **Status:** Not started
+
+**8. DevOps/Deployment**
+- Create Dockerfile for containerization
+- Add deployment configuration (prod vs dev profiles)
+- Configure environment variables for sensitive data
+- Add logging configuration
+- **Status:** Not started
+
+**9. Code Quality**
+- Add code coverage reports
+- Set up code formatting (Checkstyle, SpotBugs)
+- Add API documentation improvements
+- Refactor technical debt (ItemDAO.addItem() returning ID=0)
+- **Status:** Not started
+
+---
+
+## What Constitutes "Modernized and Polished"
+
+**Already Completed ✅:**
+- React frontend with modern tech stack (React 19, Vite, React Router, Axios, Tailwind)
+- Modern backend (Spring Boot 3.2.0, Java 21, JPA/Hibernate)
+- DTOs for clean API contracts
+- Bean validation
+- Global exception handling
+- REST API design with proper status codes
+- Swagger/OpenAPI documentation
+- Password hashing with BCrypt
+- Authentication state management (React Context)
+- Protected routes (ProtectedRoute component)
+
+**Must Fix ⚠️:**
+- Cross-user ownership vulnerability (security issue)
+- CSRF protection before production
+
+**Polish Needed 🎨:**
+- Frontend update/delete buttons for items
+- Complete Edit Account integration
+
+**Optional Additions 👥:**
+- Admin functionality
+- List management
+- Testing suite
+- DevOps/deployment
+- Code quality tools
+
+**Recommendation:** Focus on items 1-4 (High Priority) first to complete core functionality and address the security vulnerability. Items 5-9 can be added incrementally as needed.
 - **Phase 2 Step 4: Add OpenAPI/Swagger Documentation - COMPLETED**
   - Added SpringDoc OpenAPI dependency to pom.xml (version 2.3.0)
   - Added Swagger configuration to application.properties

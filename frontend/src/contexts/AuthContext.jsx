@@ -15,10 +15,9 @@ export const useAuth = () => {
 
 // AuthProvider component to wrap the application
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null) // Will store user object { username, userId }
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Check for existing session on app load
   useEffect(() => {
     const storedUser = sessionStorage.getItem('user')
     const storedUserId = sessionStorage.getItem('userId')
@@ -28,10 +27,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  // Login function
   const login = async (username, password) => {
     const response = await userAPI.login(username, password)
-    // Backend now returns UserResponse object: { userId, username, role }
     if (response.data.userId) {
       const userData = { username, userId: response.data.userId }
       setUser(userData)
@@ -39,11 +36,9 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.setItem('userId', response.data.userId)
       return { success: true, data: response.data }
     }
-    // Error case - return the response so the component can handle it
     return { success: false, response }
   }
 
-  // Logout function
   const logout = async () => {
     await userAPI.logout()
     setUser(null)
@@ -51,19 +46,14 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.removeItem('userId')
   }
 
-  // Signup function
   const signup = async (username, password, role) => {
     const response = await userAPI.signup(username, password, role)
-    // Backend now returns UserResponse object on success: { userId, username, role }
-    // On error, it returns ErrorResponse: { status, message, errors }
     if (response.data.userId) {
       return { success: true, data: response.data }
     }
-    // Error case - return the response so the component can handle it
     return { success: false, response }
   }
 
-  // Update User function
   const update = async (username, password) => {
     const userId = user.userId
     try {
@@ -76,12 +66,10 @@ export const AuthProvider = ({ children }) => {
       }
       return {success: false, response}
     } catch (err) {
-      // Return the error response so the component can handle it
       return { success: false, response: err.response }
     }
   }
 
-  // Delete User function
   const deleteUser = async (username, password) => {
     const userId = user.userId
     try{
@@ -95,7 +83,6 @@ export const AuthProvider = ({ children }) => {
       return {success: false, response}
     }
     catch (err){
-      // Return the error response so the component can handle it
       return { success: false, response: err.response }
     }
   }
