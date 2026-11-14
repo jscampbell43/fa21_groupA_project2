@@ -296,6 +296,89 @@ These features should be added after completing all modernization phases (Phases
 
 ---
 
+### Session 2026-11-13 (Cross-User Ownership Security Fix)
+**Goal:** Implement ownership checks to prevent users from updating/deleting other users' items
+
+**What Was Done:**
+1. **Created UnauthorizedAccessException** - New exception class for authorization errors
+2. **Updated UserController.loginUser()** - Store user_id in HttpSession for persistence across requests
+   - Added HttpServletRequest parameter to loginUser method
+   - Added `httpRequest.getSession().setAttribute("userId", user.getUser_id())`
+   - Required because Spring Security web security is disabled, so SecurityContext doesn't persist
+3. **Updated ItemController.updateItem()** - Added ownership check
+   - Retrieves authenticated user_id from HttpSession
+   - Compares with existing item's user_id from database
+   - Throws UnauthorizedAccessException if they don't match
+   - Added null check for unauthenticated users
+4. **Updated ItemController.deleteItem()** - Added ownership check
+   - Same logic as updateItem
+   - Prevents users from deleting other users' items
+5. **Updated GlobalExceptionHandler** - Added handler for UnauthorizedAccessException
+   - Returns HTTP 403 FORBIDDEN status
+   - Changed from UNAUTHORIZED (401) to FORBIDDEN (403) for correct semantics
+6. **Added required imports** - HttpSession, HttpServletRequest, RequestContextHolder, ServletRequestAttributes
+
+**Security Fix Summary:**
+- **Before:** Malicious users could send any user_id in request body to update/delete other users' items
+- **After:** Users can only update/delete items where `item.user_id == authenticated_user_id` from HttpSession
+- **Key Principle:** Never trust user_id from request body; always derive from server-side session
+
+**Files Modified:**
+- UserController.java (added HttpSession storage)
+- ItemController.java (added ownership checks in updateItem and deleteItem)
+- UnauthorizedAccessException.java (new exception class)
+- GlobalExceptionHandler.java (added exception handler)
+- AGENTS.md (documented completion)
+
+**Testing:**
+- Verified User B cannot update User A's items (403 Forbidden)
+- Verified User B cannot delete User A's items (403 Forbidden)
+- Verified User B can update their own items (200 OK)
+- Verified User B can delete their own items (200 OK)
+
+**Lessons Learned:**
+- SecurityContext doesn't persist across requests without Spring Security web security enabled
+- HttpSession is the correct way to persist authentication state with manual authentication
+- Browser fetch() calls need `credentials: 'include'` to send session cookies for cross-origin requests
+- Ownership checks must compare with database item's user_id, not request body's user_id
+
+---
+
+### Session 2026-11-13 (CSRF Protection - SameSite Cookie)
+**Goal:** Add CSRF protection as a partial defense measure
+
+**What Was Done:**
+1. **Added SameSite cookie attribute** to application.properties
+   - Configuration: `server.servlet.session.cookie.same-site=lax`
+   - Prevents cross-site requests from sending session cookies
+   - Blocks most CSRF attacks at the browser level
+2. **Documented limitations**
+   - SameSite is a partial defense, not a complete solution
+   - Older browsers don't support it
+   - For production, need JWT authentication or proper Spring Security CSRF tokens
+
+**What SameSite Does:**
+- Allows cookies for same-site requests (frontend → backend)
+- Allows cookies for top-level navigations (clicking links)
+- Blocks cookies for cross-site POST/PUT/DELETE requests
+- Prevents most CSRF attack vectors
+
+**Files Modified:**
+- application.properties (added SameSite cookie configuration)
+- AGENTS.md (documented completion)
+
+**Testing:**
+- Verified application still works after configuration change
+- Login, logout, add items, update items, delete items all functional
+
+**Notes:**
+- This is a defense-in-depth measure
+- Complete CSRF protection requires Spring Security or JWT authentication
+- Suitable for current development environment
+- For production, plan to implement JWT or enable Spring Security
+
+---
+
 ## Session History
 
 ### Session 2026-10-27 (Phase 2: Backend API Polish - Step 3 Complete)
@@ -473,8 +556,8 @@ These features should be added after completing all modernization phases (Phases
 - ✅ Backend with DTOs, validation, exception handling, Swagger
 - ✅ CORS configured
 - ✅ ProtectedRoute component for frontend route protection
-- ⚠️ Cross-user ownership vulnerability exists (security issue to fix)
-- ⚠️ CSRF disabled (enable before production)
+- ✅ Cross-user ownership vulnerability FIXED (ownership checks implemented)
+- ✅ CSRF partial protection implemented (SameSite cookie attribute)
 
 **Files Changed This Session:**
 - application.properties (re-added auto-configuration exclusion)
@@ -493,22 +576,40 @@ These features should be added after completing all modernization phases (Phases
 
 ### HIGH PRIORITY (Core Security & Functionality)
 
-**1. Fix Cross-User Item Ownership Vulnerability** ⚠️ CRITICAL SECURITY ISSUE
-- **Problem:** Authenticated users can update/delete another user's items by supplying different item ID/user ID
-- **Fix Required:** In ItemController, add ownership checks before update/delete operations
-- **Implementation:**
-  - Before updating item: verify `item.getUserId() == authenticatedUserId`
-  - Before deleting item: verify `item.getUserId() == authenticatedUserId`
-  - Derive `authenticatedUserId` from SecurityContext or session, not from request body
-- **Status:** Not started
+**1. Fix Cross-User Item Ownership Vulnerability** ✅ COMPLETED (2026-11-13)
+- **Problem:** Authenticated users could update/delete another user's items by supplying different item ID/user ID
+- **Solution Implemented:**
+  - Added ownership checks in ItemController.updateItem() and ItemController.deleteItem()
+  - Before updating/deleting: verify `existingItem.getUser_id() == authenticatedUserId`
+  - Authenticated user_id derived from HttpSession (not from request body)
+  - UnauthorizedAccessException thrown when ownership check fails
+  - GlobalExceptionHandler returns HTTP 403 FORBIDDEN for unauthorized access
+- **Implementation Details:**
+  - UserController.loginUser() stores user_id in HttpSession attribute "userId"
+  - ItemController retrieves user_id from HttpSession for authorization
+  - Ownership check compares HttpSession user_id with existing item's user_id from database
+  - Malicious clients cannot forge user_id from request body
+- **Testing:** Verified that User B cannot update/delete User A's items (403 Forbidden)
+- **Files Modified:**
+  - UserController.java (added HttpSession storage of user_id)
+  - ItemController.java (added ownership checks in updateItem and deleteItem)
+  - UnauthorizedAccessException.java (new exception class)
+  - GlobalExceptionHandler.java (added handler for 403 status)
 
-**2. Enable CSRF Protection** 🔒 SECURITY
-- **Current:** CSRF is disabled in SecurityConfig
-- **Issue:** CSRF is complex to implement with manual authentication in SPAs
-- **Options:**
-  - Document as production todo for now
-  - Or switch to stateless authentication (JWT) which doesn't need CSRF
-- **Status:** Not started
+**2. Enable CSRF Protection** ✅ PARTIALLY IMPLEMENTED (2026-11-13)
+- **Current:** CSRF protection partially implemented via SameSite cookie attribute
+- **Implementation:** Added `server.servlet.session.cookie.same-site=lax` to application.properties
+- **What it does:**
+  - Blocks cross-site POST/PUT/DELETE requests from sending session cookies
+  - Prevents most CSRF attacks at the browser level
+  - Allows same-site requests and top-level navigations
+- **Limitations:**
+  - Not a complete CSRF solution (older browsers don't support it)
+  - Defense-in-depth measure, not replacement for proper CSRF tokens
+  - For production, consider JWT authentication or enabling Spring Security with proper CSRF tokens
+- **Files Modified:**
+  - application.properties (added SameSite cookie configuration)
+- **Status:** Partial defense implemented; complete CSRF protection requires architectural changes
 
 **3. Frontend Item Update and Delete UI**
 - **Current:** Backend endpoints exist, but Wishlist.jsx needs update/delete buttons

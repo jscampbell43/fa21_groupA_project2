@@ -37,6 +37,7 @@ import com.example.Wishlist.exceptions.DuplicateUsernameException;
 import com.example.Wishlist.exceptions.PasswordNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 // REST Controller for handling user-related HTTP requests
@@ -120,7 +121,8 @@ public class UserController {
     @PostMapping(value = "/login")
     public ResponseEntity<UserResponse> loginUser(
         @Valid
-        @RequestBody LoginRequest request
+        @RequestBody LoginRequest request,
+        HttpServletRequest httpRequest
     ){
         UserDB user = userDAO.findUserByName(request.getUsername());
         if (user == null) {
@@ -131,11 +133,16 @@ public class UserController {
         }
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                request.getUsername(),
-                null,
+                user.getUser_id(),
+                user.getUsername(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // ALSO store in HttpSession for persistence across requests
+            //(This is due to Spring Security not being enabled so we cannot persist SecurityContext)
+            httpRequest.getSession().setAttribute("userId", user.getUser_id());
+
             UserResponse userResponse = new UserResponse(user.getUser_id(), user.getUsername(), user.getRole());
             return ResponseEntity.ok(userResponse);
         } else {

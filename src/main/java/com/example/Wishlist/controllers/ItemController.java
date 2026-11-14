@@ -18,9 +18,15 @@ import com.example.Wishlist.dto.AddItemRequest;
 import com.example.Wishlist.dto.UpdateItemRequest;
 import com.example.Wishlist.dto.DeleteItemRequest;
 import com.example.Wishlist.exceptions.ItemNotFoundException;
+import com.example.Wishlist.exceptions.UnauthorizedAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 // REST Controller for handling item-related HTTP requests
 // Base path: /items
@@ -130,9 +136,29 @@ public class ItemController {
     ){
         // Fetch items by the itemId
         List<ItemDB> existingItems = itemDAO.findByItemId(request.getId());
+
         // If item not found throw exception
         if (existingItems == null || existingItems.isEmpty()){
             throw new ItemNotFoundException(request.getId());
+        }
+
+        // Get existing Item from database
+        ItemDB existingItem = existingItems.get(0);
+
+        // Get authenticated user_id from HttpSession
+        HttpSession session = ((HttpServletRequest) 
+            ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+            .getRequest()).getSession();
+        
+        Integer authorizedUserId = (Integer) session.getAttribute("userId");
+        
+        if (authorizedUserId == null) {
+            throw new UnauthorizedAccessException(0); // User not logged in
+        }
+        
+        // Ownership check, if item has different userId do not allow update
+        if(existingItem.getUser_id() != authorizedUserId){
+            throw new UnauthorizedAccessException(authorizedUserId);
         }
 
         // Reconstruct ItemDB Entity
@@ -173,8 +199,27 @@ public class ItemController {
             if (existingItems == null || existingItems.isEmpty()){
                 throw new ItemNotFoundException(request.getId());
             }
-            // If item exists delete first occurence in list
+
+            // Get existing Item to delete
             ItemDB itemToDelete = existingItems.get(0);
+
+            // Get authenticated user_id from HttpSession
+            HttpSession session = ((HttpServletRequest) 
+                ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                .getRequest()).getSession();
+            
+            Integer authorizedUserId = (Integer) session.getAttribute("userId");
+            
+            if (authorizedUserId == null) {
+                throw new UnauthorizedAccessException(0); // User not logged in
+            }
+
+            // Ownership check, if item has different userId do not allow delete
+            if(itemToDelete.getUser_id() != authorizedUserId){
+                throw new UnauthorizedAccessException(authorizedUserId);
+            }
+
+            // If item exists and user is authorized delete first occurence in list
             itemDAO.delete(itemToDelete);
             // Create Map to hold Response, Return Map
             Map<String, String> response = new HashMap<>();
